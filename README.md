@@ -105,7 +105,9 @@ Certifique-se de que:
 
 ### 2. Configurar variáveis de ambiente
 
-**Opção 1:** Copie o arquivo `.env.prod` para `.env`:
+**IMPORTANTE:** Para evitar conflito de portas com o Traefik, você precisa usar portas alternativas.
+
+**Opção 1 (Recomendada):** Copie o arquivo `.env.prod` para `.env`:
 ```bash
 cd azuracast
 cp .env.prod .env
@@ -117,7 +119,7 @@ AZURACAST_HTTP_PORT=10080
 AZURACAST_HTTPS_PORT=10443
 ```
 
-**Importante:** Essas portas são apenas internas. O Traefik vai expor o serviço apenas na porta 443 (HTTPS).
+**Nota:** O arquivo `docker-compose.prod.yml` não expõe portas HTTP/HTTPS diretamente (apenas SFTP e streams). O Traefik acessa o container via network Docker na porta 80 interna, então não há conflito mesmo se o `.env` tiver portas 80/443. Mas é recomendado usar portas alternativas para clareza.
 
 ### 3. Primeira Instalação (se for a primeira vez)
 
