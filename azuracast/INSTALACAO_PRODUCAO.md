@@ -253,12 +253,110 @@ Marque cada item após verificar:
 - [ ] Traefik está conseguindo conectar ao container
 - [ ] Portas 2022 (SFTP) e 10000-10099 (streams) estão expostas
 
+## Erro: Bad Gateway (502)
+
+Se você receber "Bad Gateway" ao acessar `https://radio.gwan.com.br`, siga estes passos:
+
+### 1. Verificar se o Container Está na Network Correta
+
+```bash
+# Verificar networks do container
+docker inspect gwan-radio-web-1 | grep -A 10 "Networks"
+
+# Verificar se está na network gwan
+docker network inspect gwan | grep gwan-radio-web-1
+
+# Se não estiver, adicione manualmente:
+docker network connect gwan gwan-radio-web-1
+```
+
+### 2. Verificar se o AzuraCast Está Respondendo Internamente
+
+```bash
+# Testar HTTP direto no container (porta 80 interna)
+docker exec -it gwan-radio-web-1 curl -I http://localhost
+
+# Deve retornar: HTTP/1.1 200 OK ou HTTP/1.1 302 Found
+# Se retornar erro, o AzuraCast ainda não está pronto
+```
+
+### 3. Verificar se o Container Está Completamente Inicializado
+
+```bash
+# Ver logs recentes
+docker compose -f docker-compose.yml -f docker-compose.prod.yml logs --tail=50 web
+
+# Procure por:
+# ✅ "Services started up and ready!"
+# ✅ "startup entered RUNNING state"
+# ❌ Evite: "Waiting...", "ERROR", "FATAL"
+```
+
+### 4. Verificar Configuração do Traefik
+
+```bash
+# Verificar se o Traefik está vendo o container
+# (acesse o dashboard do Traefik ou verifique logs)
+docker logs traefik | grep azuracast
+
+# Verificar se os labels estão corretos
+docker inspect gwan-radio-web-1 | grep -A 20 "Labels"
+```
+
+### 5. Reiniciar o Container (se necessário)
+
+```bash
+cd azuracast
+docker compose -f docker-compose.yml -f docker-compose.prod.yml restart web
+
+# Aguarde 1-2 minutos e teste novamente
+```
+
+### 6. Verificar se o Traefik Está Rodando
+
+```bash
+# Verificar status do Traefik
+docker ps | grep traefik
+
+# Ver logs do Traefik
+docker logs traefik --tail=50
+```
+
+### 7. Solução: Recriar Container na Network Correta
+
+Se nada funcionar, recrie o container:
+
+```bash
+cd azuracast
+
+# Parar e remover container (mantém volumes)
+docker compose -f docker-compose.yml -f docker-compose.prod.yml down
+
+# Subir novamente
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# Verificar se está na network correta
+docker network inspect gwan | grep gwan-radio-web-1
+```
+
+### 8. Verificar IP do Container na Network
+
+```bash
+# Ver IP do container na network gwan
+docker inspect gwan-radio-web-1 | grep -A 5 '"gwan"'
+
+# Testar conexão do Traefik ao IP do container
+docker exec traefik curl -I http://<IP_DO_CONTAINER>
+```
+
 ## Se Algo Não Estiver Funcionando
 
-### Site não carrega (502/503)
+### Site não carrega (502 Bad Gateway)
 - Verifique se o Traefik está rodando
 - Verifique se o container está na network `gwan`
-- Verifique logs do Traefik
+- Verifique se o AzuraCast está respondendo na porta 80 interna
+- Verifique logs do Traefik e do AzuraCast
+- Aguarde alguns minutos se o container acabou de iniciar
 
 ### MariaDB não inicia
 - Verifique espaço em disco: `df -h`
