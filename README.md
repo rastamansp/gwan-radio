@@ -123,17 +123,23 @@ AZURACAST_HTTPS_PORT=10443
 
 ### 3. Primeira Instalação (se for a primeira vez)
 
-**IMPORTANTE:** Na primeira vez em produção, execute o comando de instalação:
+**IMPORTANTE:** Na primeira vez em produção, você DEVE executar o comando de instalação ANTES de subir os containers:
 
 ```bash
 cd azuracast
 
-# Executar instalação inicial
+# 1. Executar instalação inicial (cria o banco de dados e configura tudo)
 docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm web -- azuracast_install
 
-# Subir os serviços
+# 2. Subir os serviços
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
+
+**Atenção:** O comando `azuracast_install` pode levar alguns minutos na primeira execução. Ele irá:
+- Inicializar o banco de dados MariaDB
+- Criar todas as tabelas necessárias
+- Configurar o sistema
+- Preparar o ambiente para uso
 
 ### 4. Subir os serviços (após instalação inicial)
 
@@ -218,20 +224,22 @@ Se você receber erros como:
 ```
 ERROR: Can't open and lock privilege tables: Table 'mysql.db' doesn't exist
 ERROR: Fatal error: Can't open and lock privilege tables
+ERROR: Could not open mysql.plugin table: "Table 'mysql.plugin' doesn't exist"
 ```
 
-Isso indica que o MariaDB não conseguiu inicializar as tabelas do sistema na primeira execução.
+Isso indica que o volume do banco de dados está corrompido ou não foi inicializado corretamente.
 
-**Solução:**
+**Solução para Desenvolvimento Local:**
 
 1. **Parar todos os containers:**
    ```bash
+   cd azuracast
    docker compose down
    ```
 
 2. **Remover o volume do banco de dados:**
    ```bash
-   docker volume rm azuracast_azuracast_db_data
+   docker volume rm azuracast_db_data
    ```
    
    Ou, se preferir remover todos os volumes (cuidado: apaga todos os dados!):
@@ -239,28 +247,64 @@ Isso indica que o MariaDB não conseguiu inicializar as tabelas do sistema na pr
    docker compose down -v
    ```
 
-3. **Recriar os containers:**
+3. **Executar instalação inicial:**
+   ```bash
+   docker compose run --rm web -- azuracast_install
+   ```
+
+4. **Subir os containers:**
    ```bash
    docker compose up -d
    ```
 
-4. **Aguardar a inicialização completa (pode levar 2-5 minutos na primeira vez):**
+5. **Aguardar a inicialização completa (pode levar 2-5 minutos):**
    ```bash
    docker compose logs -f web
    ```
+
+**Solução para Produção:**
+
+1. **Parar todos os containers:**
+   ```bash
+   cd azuracast
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml down
+   ```
+
+2. **Remover o volume do banco de dados:**
+   ```bash
+   docker volume rm azuracast_db_data
+   ```
    
-   Aguarde até ver mensagens indicando que o MariaDB iniciou corretamente e o AzuraCast concluiu o setup.
+   Ou, se preferir remover todos os volumes (cuidado: apaga todos os dados!):
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml down -v
+   ```
 
-**Nota:** Na primeira inicialização, o AzuraCast precisa:
-- Inicializar o MariaDB e criar as tabelas do sistema
-- Criar o banco de dados `azuracast`
-- Executar as migrations
-- Configurar o sistema
+3. **Executar instalação inicial:**
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm web -- azuracast_install
+   ```
 
-Isso pode levar alguns minutos. Se o problema persistir após 5 minutos, tente:
-- Verificar se há espaço em disco suficiente
-- Verificar os logs completos: `docker compose logs web`
-- Considerar usar o script oficial de instalação do AzuraCast
+4. **Subir os containers:**
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+   ```
+
+5. **Aguardar a inicialização completa (pode levar 2-5 minutos):**
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f web
+   ```
+
+**Nota:** O comando `azuracast_install` é ESSENCIAL na primeira vez. Ele:
+- Inicializa o MariaDB e cria as tabelas do sistema
+- Cria o banco de dados `azuracast`
+- Executa as migrations
+- Configura o sistema
+
+Se o problema persistir após 5 minutos, verifique:
+- Espaço em disco suficiente: `df -h`
+- Logs completos: `docker compose logs web` (ou com `-f` para produção)
+- Permissões do volume Docker
 
 ### Erro: "Table 'azuracast.settings' doesn't exist"
 
