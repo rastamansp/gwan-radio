@@ -35,7 +35,7 @@ Isso simplifica a configuração e evita problemas de conectividade entre servi�
 - Docker + Docker Compose Plugin
 - Traefik rodando e com network externa `gwan` criada
 - DNS: `radio.gwan.com.br` apontando para o IP da VPS
-- Firewall: Portas 8000-8099 liberadas para streams
+- Firewall: Portas 10000-10099 liberadas para streams (mapeadas externamente)
 
 ## Desenvolvimento Local
 
@@ -101,7 +101,7 @@ Certifique-se de que:
 - Traefik está rodando
 - Network `gwan` existe: `docker network create gwan` (se necessário)
 - DNS `radio.gwan.com.br` aponta para o IP da VPS
-- Firewall libera portas 8000-8099
+- Firewall libera portas 10000-10099 (portas externas para streams)
 
 ### 2. Configurar variáveis de ambiente
 
@@ -146,7 +146,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
 - Interface web: `https://radio.gwan.com.br` (via Traefik)
 - HTTP será automaticamente redirecionado para HTTPS
-- Streams: Portas 8000-8099 (acessíveis diretamente pelo IP da VPS)
+- Streams: Portas externas 10000-10099 (mapeadas para portas internas 8000-8099)
 
 ### 5. Ver logs
 
@@ -186,8 +186,8 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml down
 ### UFW (Ubuntu/Debian)
 
 ```bash
-# Liberar portas para streams
-sudo ufw allow 8000:8099/tcp
+# Liberar portas para streams (portas externas em produção)
+sudo ufw allow 10000:10099/tcp
 
 # Verificar status
 sudo ufw status
@@ -195,7 +195,7 @@ sudo ufw status
 
 ### Hostinger Firewall
 
-Se houver firewall no painel da Hostinger, também libere a faixa de portas 8000-8099.
+Se houver firewall no painel da Hostinger, também libere a faixa de portas 10000-10099 (portas externas para streams).
 
 ## Portas Utilizadas
 
@@ -203,13 +203,13 @@ Se houver firewall no painel da Hostinger, também libere a faixa de portas 8000
 - **80**: HTTP (interface web)
 - **443**: HTTPS (interface web)
 - **2022**: SFTP (transferência de arquivos)
-- **8000-8099**: Streams de rádio (Icecast/Shoutcast)
+- **10000-10099**: Streams de rádio (portas externas, mapeadas para 8000-8099 internas)
 
 ### Produção
 - **10080**: HTTP interno (Traefik expõe apenas 443)
 - **10443**: HTTPS interno (Traefik expõe apenas 443)
 - **2022**: SFTP (transferência de arquivos)
-- **8000-8099**: Streams de rádio (acessíveis diretamente)
+- **10000-10099**: Streams de rádio (portas externas, acessíveis diretamente pelo IP da VPS)
 
 ## Troubleshooting
 
@@ -334,6 +334,8 @@ docker compose exec azuracast php azuracast.php version
 - **Imagem Oficial**: Usa a imagem oficial monolítica do AzuraCast (`ghcr.io/azuracast/azuracast`)
 - **Desenvolvimento**: Usa portas padrão (80/443) diretamente, sem Traefik
 - **Produção**: Usa portas alternativas (10080/10443) e Traefik como reverse proxy
-- **Streams**: Sempre usam portas 8000-8099 em ambos os ambientes
+- **Streams**: 
+  - **Desenvolvimento**: Portas 8000-8099 (internas e externas)
+  - **Produção**: Portas externas 10000-10099 mapeadas para portas internas 8000-8099
 - **Volumes**: Dados são persistidos em volumes Docker nomeados
 - **Serviços Internos**: MariaDB, Redis e InfluxDB estão todos dentro do mesmo container, evitando problemas de conectividade

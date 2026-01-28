@@ -47,9 +47,9 @@ services:
       - "10080:80"       # HTTP interno (não exposto externamente - Traefik usa network Docker)
       - "10443:443"      # HTTPS interno (não exposto externamente - Traefik usa network Docker)
       - "2022:2022"      # SFTP
-      # Streams: mapeia portas externas 9000-9099 para portas internas 8000-8099
-      # Isso evita conflito se a porta 8000 estiver em uso
-      - "9000-9099:8000-8099"
+      # Streams: mapeia portas externas 10000-10099 para portas internas 8000-8099
+      # Isso evita conflito com portas 8000 e 9000 que podem estar em uso
+      - "10000-10099:8000-8099"
 
 networks:
   azuracast_internal:
