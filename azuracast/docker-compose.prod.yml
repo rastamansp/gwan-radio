@@ -48,6 +48,25 @@ services:
       # Streams: mapeia portas externas 10000-10099 para portas internas 8000-8099
       # Isso evita conflito com portas 8000, 9000 e 10080 que podem estar em uso
       - "10000-10099:8000-8099"
+    
+    # Volumes: definidos explicitamente para garantir funcionamento no Portainer
+    # Mesmo que sejam herdados do docker-compose.yml base, é melhor definir aqui também
+    volumes:
+      - station_data:/var/azuracast/stations
+      - backups:/var/azuracast/backups
+      - db_data:/var/lib/mysql
+      - www_uploads:/var/azuracast/storage/uploads
+      - shoutcast2_install:/var/azuracast/storage/shoutcast2
+      - stereo_tool_install:/var/azuracast/storage/stereo_tool
+      - rsas_install:/var/azuracast/storage/rsas
+      - geolite_install:/var/azuracast/storage/geoip
+      - sftpgo_data:/var/azuracast/storage/sftpgo
+      - acme:/var/azuracast/storage/acme
+    
+    # Variáveis de ambiente (herdadas do docker-compose.yml base)
+    env_file:
+      - azuracast.env
+      - .env
 
 volumes:
   # Volumes são definidos no docker-compose.yml base
