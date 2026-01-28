@@ -2,6 +2,8 @@
 
 Projeto de webradio usando AzuraCast oficial (imagem monolítica) com suporte para desenvolvimento local e produção com Traefik.
 
+> **Nota sobre Instalação:** Este projeto usa `docker compose` diretamente ao invés do script `docker.sh` oficial do AzuraCast. Isso permite maior controle e integração com Traefik. Os comandos são equivalentes - o script oficial apenas simplifica a execução dos mesmos comandos Docker Compose que usamos aqui.
+
 ## Estrutura do Projeto
 
 ```
