@@ -33,7 +33,7 @@ Isso simplifica a configuração e evita problemas de conectividade entre servi�
 
 ### Produção
 - Docker + Docker Compose Plugin
-- Traefik rodando e com network externa `traefik_public` criada
+- Traefik rodando e com network externa `gwan` criada
 - DNS: `radio.gwan.com.br` apontando para o IP da VPS
 - Firewall: Portas 8000-8099 liberadas para streams
 
