@@ -40,12 +40,10 @@ services:
       # Service: AzuraCast (HTTP dentro do container na porta 80)
       - "traefik.http.services.azuracast.loadbalancer.server.port=80"
     
-    # Portas alternativas para evitar conflito com Traefik
-    # O Traefik vai expor apenas na porta 443, essas portas são apenas internas
-    # Não expor HTTP/HTTPS diretamente - apenas via Traefik
+    # Portas: Remover HTTP/HTTPS para evitar conflito com Traefik
+    # O Traefik acessa o container via network Docker, não precisa expor portas HTTP/HTTPS
+    # Apenas manter SFTP e streams
     ports:
-      - "10080:80"   # Porta interna HTTP (não exposta externamente)
-      - "10443:443"  # Porta interna HTTPS (não exposta externamente)
       - "${AZURACAST_SFTP_PORT:-2022}:2022"
       # Faixa de portas para streams (mantém a mesma)
       - "8000-8099:8000-8099"
