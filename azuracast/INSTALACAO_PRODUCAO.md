@@ -384,3 +384,88 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml logs web
 ### MariaDB não aparece no Portainer
 
 **Isso é normal!** O MariaDB está dentro do container `gwan-radio-web-1`. Use os comandos acima para verificar se está rodando.
+
+### Erro: "Timed out waiting for services to start" / MariaDB não responde
+
+Se você ver nos logs:
+```
+Waiting for database (MariaDB) to become available...
+[ERROR] Timed out waiting for services to start.
+```
+
+Isso significa que o MariaDB não foi inicializado corretamente. **Solução:**
+
+#### Via Portainer:
+
+1. **Parar o Stack:**
+   - Vá em **Stacks** → `gwan-radio`
+   - Clique em **Stop**
+
+2. **Remover Volume do Banco (se necessário):**
+   - Vá em **Volumes**
+   - Procure por `azuracast_db_data`
+   - Clique em **Remove** (⚠️ Isso apaga dados se houver)
+
+3. **Executar Instalação Inicial:**
+   
+   **Opção A - Via Portainer Console:**
+   - Vá em **Containers**
+   - Clique em **Add container**
+   - Configure:
+     - **Name**: `azuracast-install-temp`
+     - **Image**: `ghcr.io/azuracast/azuracast:latest`
+     - **Command**: `azuracast_install`
+     - **Volumes**: Adicione os mesmos volumes do stack:
+       - `azuracast_db_data:/var/lib/mysql`
+       - `azuracast_station_data:/var/azuracast/stations`
+       - `azuracast_backups:/var/azuracast/backups`
+       - (adicione todos os volumes do docker-compose.yml)
+     - **Networks**: Adicione `azuracast_internal`
+     - **Environment**: Adicione as variáveis de `azuracast.env`:
+       - `APPLICATION_ENV=production`
+       - `TZ=America/Sao_Paulo`
+       - `MARIADB_RANDOM_ROOT_PASSWORD=yes`
+       - `AUTO_ASSIGN_PORT_MIN=8000`
+       - `AUTO_ASSIGN_PORT_MAX=8099`
+   - Clique em **Deploy the container**
+   - Aguarde a conclusão (2-5 minutos)
+   - Verifique os logs para confirmar sucesso
+   - **Remova o container temporário** após a instalação
+
+   **Opção B - Via SSH (Recomendado):**
+   ```bash
+   cd azuracast
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm web -- azuracast_install
+   ```
+
+4. **Subir o Stack Novamente:**
+   - Vá em **Stacks** → `gwan-radio`
+   - Clique em **Start** ou **Update the stack**
+
+5. **Aguardar Inicialização:**
+   - Aguarde 2-5 minutos
+   - Verifique os logs em **Containers** → `gwan-radio-web-1` → **Logs**
+   - Procure por: `Services started up and ready!` sem erros de timeout
+
+#### Via SSH (Mais Rápido):
+
+```bash
+cd azuracast
+
+# 1. Parar containers
+docker compose -f docker-compose.yml -f docker-compose.prod.yml down
+
+# 2. Remover volume do banco (se necessário)
+docker volume rm azuracast_db_data
+
+# 3. Executar instalação inicial (OBRIGATÓRIO!)
+docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm web -- azuracast_install
+
+# 4. Subir containers
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# 5. Ver logs
+docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f web
+```
+
+**Importante:** O comando `azuracast_install` é **ESSENCIAL** na primeira vez. Ele inicializa o MariaDB e cria todas as tabelas necessárias.
