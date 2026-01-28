@@ -6,6 +6,11 @@ services:
     # Garantir que a imagem seja mantida
     image: "ghcr.io/azuracast/azuracast:${AZURACAST_VERSION:-latest}"
     
+    # Variáveis de ambiente para sobrescrever portas do .env
+    environment:
+      - AZURACAST_HTTP_PORT=10080
+      - AZURACAST_HTTPS_PORT=10443
+    
     # Adiciona network externa do Traefik (mantém azuracast_internal e adiciona gwan)
     networks:
       - azuracast_internal
@@ -40,13 +45,14 @@ services:
       # Service: AzuraCast (HTTP dentro do container na porta 80)
       - "traefik.http.services.azuracast.loadbalancer.server.port=80"
     
-    # Portas: Remover HTTP/HTTPS para evitar conflito com Traefik
-    # O Traefik acessa o container via network Docker, não precisa expor portas HTTP/HTTPS
-    # Apenas manter SFTP e streams
+    # Portas: Usar portas alternativas para evitar conflito com Traefik
+    # O Traefik acessa o container via network Docker na porta 80 interna
+    # Portas HTTP/HTTPS são apenas internas (10080/10443), não expostas externamente
     ports:
-      - "${AZURACAST_SFTP_PORT:-2022}:2022"
-      # Faixa de portas para streams (mantém a mesma)
-      - "8000-8099:8000-8099"
+      - "10080:80"       # HTTP interno (não exposto externamente)
+      - "10443:443"      # HTTPS interno (não exposto externamente)
+      - "2022:2022"      # SFTP
+      - "8000-8099:8000-8099"  # Streams de rádio
 
 networks:
   azuracast_internal:
