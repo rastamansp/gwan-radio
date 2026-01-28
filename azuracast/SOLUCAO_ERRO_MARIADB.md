@@ -32,7 +32,72 @@ Isso significa que o volume do banco de dados está **corrompido** ou **não foi
 
 **IMPORTANTE:** Este passo é **OBRIGATÓRIO** na primeira vez!
 
-#### Opção A: Via Portainer (Mais Visual)
+#### Opção A: Via Portainer usando docker-compose.install.yml (Recomendado)
+
+1. No Portainer, vá em **Stacks**
+2. Clique em **Add stack**
+3. Configure:
+   - **Name**: `azuracast-install` (temporário)
+   - **Build method**: Selecione **Web editor**
+   - Cole o conteúdo do arquivo `docker-compose.install.yml` (veja abaixo)
+   - Ou use **Repository** e aponte para o repositório Git com o arquivo
+4. Clique em **Deploy the stack**
+5. Aguarde 2-5 minutos
+6. Vá em **Containers** → `azuracast-install` → **Logs**
+7. Procure por mensagens de sucesso:
+   - `Database initialized`
+   - `Installation complete`
+8. **Remova o stack temporário** após a instalação:
+   - Vá em **Stacks** → `azuracast-install`
+   - Clique em **Remove**
+
+**Arquivo docker-compose.install.yml:**
+```yaml
+name: azuracast-install
+
+services:
+  install:
+    container_name: azuracast-install
+    image: "ghcr.io/azuracast/azuracast:latest"
+    command: azuracast_install
+    env_file:
+      - azuracast.env
+      - .env
+    volumes:
+      - db_data:/var/lib/mysql
+      - station_data:/var/azuracast/stations
+      - backups:/var/azuracast/backups
+      - www_uploads:/var/azuracast/storage/uploads
+      - shoutcast2_install:/var/azuracast/storage/shoutcast2
+      - stereo_tool_install:/var/azuracast/storage/stereo_tool
+      - rsas_install:/var/azuracast/storage/rsas
+      - geolite_install:/var/azuracast/storage/geoip
+      - sftpgo_data:/var/azuracast/storage/sftpgo
+      - acme:/var/azuracast/storage/acme
+    networks:
+      - azuracast_internal
+    restart: "no"
+
+volumes:
+  db_data: { }
+  acme: { }
+  shoutcast2_install: { }
+  stereo_tool_install: { }
+  rsas_install: { }
+  geolite_install: { }
+  sftpgo_data: { }
+  station_data: { }
+  www_uploads: { }
+  backups: { }
+
+networks:
+  azuracast_internal:
+    driver: bridge
+```
+
+**Nota:** Você precisará criar os arquivos `azuracast.env` e `.env` no mesmo diretório ou ajustar o `env_file` no Portainer.
+
+#### Opção B: Via Portainer Console (Alternativa)
 
 1. Vá em **Containers**
 2. Clique em **Add container**

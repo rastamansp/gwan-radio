@@ -127,6 +127,8 @@ AZURACAST_HTTPS_PORT=10443
 
 **IMPORTANTE:** Na primeira vez em produção, você DEVE executar o comando de instalação ANTES de subir os containers:
 
+#### Via SSH (Recomendado):
+
 ```bash
 cd azuracast
 
@@ -136,6 +138,21 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm web -- 
 # 2. Subir os serviços
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
+
+#### Via Portainer:
+
+1. **Parar o stack `gwan-radio`** (se estiver rodando)
+2. **Criar um novo stack temporário** chamado `azuracast-install`:
+   - Vá em **Stacks** → **Add stack**
+   - **Name**: `azuracast-install`
+   - Use o arquivo `docker-compose.install.yml` (veja abaixo)
+   - Clique em **Deploy the stack**
+3. **Aguardar conclusão** (2-5 minutos)
+4. **Verificar logs** em **Containers** → `azuracast-install` → **Logs**
+5. **Remover o stack temporário** após sucesso
+6. **Subir o stack `gwan-radio`** normalmente
+
+**Arquivo `docker-compose.install.yml`** está disponível no repositório para uso no Portainer.
 
 **Atenção:** O comando `azuracast_install` pode levar alguns minutos na primeira execução. Ele irá:
 - Inicializar o banco de dados MariaDB
