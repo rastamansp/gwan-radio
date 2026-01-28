@@ -49,6 +49,20 @@ services:
       # Isso evita conflito com portas 8000, 9000 e 10080 que podem estar em uso
       - "10000-10099:8000-8099"
 
+volumes:
+  # Volumes são definidos no docker-compose.yml base
+  # Mas precisam estar aqui também para garantir criação no Portainer
+  db_data: { }
+  acme: { }
+  shoutcast2_install: { }
+  stereo_tool_install: { }
+  rsas_install: { }
+  geolite_install: { }
+  sftpgo_data: { }
+  station_data: { }
+  www_uploads: { }
+  backups: { }
+
 networks:
   azuracast_internal:
     driver: bridge
