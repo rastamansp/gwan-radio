@@ -1,0 +1,51 @@
+# Override para produção com Traefik
+# Use: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  web:
+    # Adiciona network externa do Traefik
+    networks:
+      - azuracast_internal
+      - traefik_public
+    
+    # Labels do Traefik para roteamento HTTPS
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_public"
+
+      # Router HTTP (redireciona para HTTPS)
+      - "traefik.http.routers.azuracast-http.rule=Host(`radio.gwan.com.br`)"
+      - "traefik.http.routers.azuracast-http.entrypoints=web"
+      - "traefik.http.routers.azuracast-http.middlewares=azuracast-redirect"
+
+      # Router HTTPS
+      - "traefik.http.routers.azuracast.rule=Host(`radio.gwan.com.br`)"
+      - "traefik.http.routers.azuracast.entrypoints=websecure"
+      - "traefik.http.routers.azuracast.tls=true"
+      - "traefik.http.routers.azuracast.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.azuracast.middlewares=azuracast-headers"
+
+      # Middleware: Redirect HTTP to HTTPS
+      - "traefik.http.middlewares.azuracast-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.azuracast-redirect.redirectscheme.permanent=true"
+
+      # Middleware: Headers para proxy reverso
+      - "traefik.http.middlewares.azuracast-headers.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.middlewares.azuracast-headers.headers.customrequestheaders.X-Forwarded-Host=radio.gwan.com.br"
+      - "traefik.http.middlewares.azuracast-headers.headers.customrequestheaders.X-Real-IP="
+
+      # Service: AzuraCast (HTTP dentro do container na porta 80)
+      - "traefik.http.services.azuracast.loadbalancer.server.port=80"
+    
+    # Portas alternativas para evitar conflito com Traefik
+    # O Traefik vai expor apenas na porta 443, essas portas são apenas internas
+    ports:
+      - "${AZURACAST_HTTP_PORT:-10080}:80"
+      - "${AZURACAST_HTTPS_PORT:-10443}:443"
+      - "${AZURACAST_SFTP_PORT:-2022}:2022"
+      # Faixa de portas para streams (mantém a mesma)
+      - "8000-8099:8000-8099"
+
+networks:
+  traefik_public:
+    external: true
