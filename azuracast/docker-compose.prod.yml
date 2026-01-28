@@ -3,7 +3,10 @@
 
 services:
   web:
-    # Adiciona network externa do Traefik
+    # Garantir que a imagem seja mantida
+    image: "ghcr.io/azuracast/azuracast:${AZURACAST_VERSION:-latest}"
+    
+    # Adiciona network externa do Traefik (mantém azuracast_internal e adiciona traefik_public)
     networks:
       - azuracast_internal
       - traefik_public
