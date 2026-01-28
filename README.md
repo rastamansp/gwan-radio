@@ -105,12 +105,19 @@ Certifique-se de que:
 
 ### 2. Configurar variáveis de ambiente
 
-Edite `azuracast/.env` e ajuste as portas para produção:
+**Opção 1:** Copie o arquivo `.env.prod` para `.env`:
+```bash
+cd azuracast
+cp .env.prod .env
+```
 
+**Opção 2:** Edite `azuracast/.env` manualmente e ajuste as portas:
 ```env
 AZURACAST_HTTP_PORT=10080
 AZURACAST_HTTPS_PORT=10443
 ```
+
+**Importante:** Essas portas são apenas internas. O Traefik vai expor o serviço apenas na porta 443 (HTTPS).
 
 ### 3. Primeira Instalação (se for a primeira vez)
 
