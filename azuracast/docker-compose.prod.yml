@@ -50,5 +50,7 @@ services:
       - "8000-8099:8000-8099"
 
 networks:
+  azuracast_internal:
+    driver: bridge
   traefik_public:
     external: true
