@@ -99,7 +99,7 @@ docker compose down
 
 Certifique-se de que:
 - Traefik está rodando
-- Network `traefik_public` existe: `docker network create traefik_public` (se necessário)
+- Network `gwan` existe: `docker network create gwan` (se necessário)
 - DNS `radio.gwan.com.br` aponta para o IP da VPS
 - Firewall libera portas 8000-8099
 
@@ -267,10 +267,10 @@ Isso indica que o AzuraCast está tentando executar o setup antes do banco estar
 
 ### Erro de network no Traefik
 
-Se receber erro sobre network `traefik_public` não encontrada:
+Se receber erro sobre network `gwan` não encontrada:
 
 ```bash
-docker network create traefik_public
+docker network create gwan
 ```
 
 ### Verificar se os serviços estão rodando
