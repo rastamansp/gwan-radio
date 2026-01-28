@@ -1,0 +1,45 @@
+/**
+ * Custom CSS para AzuraCast - GWAN Radio
+ * 
+ * Este arquivo permite personalizar a aparência da interface do AzuraCast.
+ * As alterações serão aplicadas automaticamente após salvar.
+ * 
+ * Documentação: https://www.azuracast.com/docs/administration/using-custom-css/
+ */
+
+/* Exemplo: Personalizar cores do tema */
+:root {
+    --primary-color: #1a73e8;
+    --secondary-color: #34a853;
+    --accent-color: #ea4335;
+}
+
+/* Exemplo: Personalizar logo/header */
+.navbar-brand {
+    /* Adicione seu logo personalizado aqui */
+    /* background-image: url('/custom/logo.png'); */
+}
+
+/* Exemplo: Personalizar botões */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #1557b0;
+    border-color: #1557b0;
+}
+
+/* Exemplo: Personalizar cards */
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Exemplo: Personalizar player de áudio */
+.audio-player {
+    /* Estilos customizados para o player */
+}
+
+/* Adicione suas personalizações abaixo */

@@ -62,6 +62,8 @@ services:
       - geolite_install:/var/azuracast/storage/geoip
       - sftpgo_data:/var/azuracast/storage/sftpgo
       - acme:/var/azuracast/storage/acme
+      # Customizações CSS/JS (montado como read-only)
+      - ./custom:/var/azuracast/www/backend/public/custom:ro
     
     # Variáveis de ambiente (herdadas do docker-compose.yml base)
     env_file:

@@ -29,6 +29,8 @@ services:
       - geolite_install:/var/azuracast/storage/geoip
       - sftpgo_data:/var/azuracast/storage/sftpgo
       - acme:/var/azuracast/storage/acme
+      # Customizações CSS/JS
+      - ./custom:/var/azuracast/www/backend/public/custom:ro
     restart: unless-stopped
     ulimits:
       nofile:
