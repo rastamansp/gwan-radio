@@ -6,15 +6,15 @@ services:
     # Garantir que a imagem seja mantida
     image: "ghcr.io/azuracast/azuracast:${AZURACAST_VERSION:-latest}"
     
-    # Adiciona network externa do Traefik (mantém azuracast_internal e adiciona traefik_public)
+    # Adiciona network externa do Traefik (mantém azuracast_internal e adiciona gwan)
     networks:
       - azuracast_internal
-      - traefik_public
+      - gwan
     
     # Labels do Traefik para roteamento HTTPS
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=traefik_public"
+      - "traefik.docker.network=gwan"
 
       # Router HTTP (redireciona para HTTPS)
       - "traefik.http.routers.azuracast-http.rule=Host(`radio.gwan.com.br`)"
@@ -52,5 +52,5 @@ services:
 networks:
   azuracast_internal:
     driver: bridge
-  traefik_public:
+  gwan:
     external: true
