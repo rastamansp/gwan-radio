@@ -18,15 +18,30 @@ Isso significa que o volume do banco de dados está **corrompido** ou **não foi
 2. Encontre `gwan-radio`
 3. Clique em **Stop** (ou no ícone de stop)
 
-### Passo 2: Remover Volume Corrompido
+### Passo 2: Verificar/Criar Volumes
+
+**Se o volume não existir (mostra "No items available"):**
+
+1. **Criar volume manualmente:**
+   - Vá em **Volumes** → **+ Add volume**
+   - **Name**: `azuracast_db_data` (ou `gwan-radio_db_data` se o stack se chama `gwan-radio`)
+   - **Driver**: `local`
+   - Clique em **Create the volume**
+
+2. **Ou criar todos os volumes necessários:**
+   - Veja o arquivo `CRIAR_VOLUMES_PORTAINER.md` para lista completa
+   - Ou execute via SSH: `docker volume create azuracast_db_data`
+
+**Se o volume existir mas estiver corrompido:**
 
 1. Vá em **Volumes**
-2. Procure por `azuracast_db_data`
+2. Procure por `azuracast_db_data` (ou `gwan-radio_db_data`)
 3. Clique no volume
 4. Clique em **Remove**
 5. Confirme a remoção
+6. **Crie novamente** seguindo os passos acima
 
-⚠️ **Atenção:** Isso apagará todos os dados do banco. Se você já tinha dados importantes, faça backup primeiro.
+⚠️ **Atenção:** Remover o volume apagará todos os dados do banco. Se você já tinha dados importantes, faça backup primeiro.
 
 ### Passo 3: Executar Instalação Inicial
 
