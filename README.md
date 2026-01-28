@@ -119,7 +119,7 @@ AZURACAST_HTTP_PORT=10080
 AZURACAST_HTTPS_PORT=10443
 ```
 
-**Nota:** O arquivo `docker-compose.prod.yml` não expõe portas HTTP/HTTPS diretamente (apenas SFTP e streams). O Traefik acessa o container via network Docker na porta 80 interna, então não há conflito mesmo se o `.env` tiver portas 80/443. Mas é recomendado usar portas alternativas para clareza.
+**Nota:** O arquivo `docker-compose.prod.yml` não expõe portas HTTP/HTTPS (apenas SFTP e streams). O Traefik acessa o container diretamente via network Docker na porta 80 interna, então não há necessidade de expor essas portas externamente. Isso evita conflitos de portas.
 
 ### 3. Primeira Instalação (se for a primeira vez)
 
@@ -206,8 +206,7 @@ Se houver firewall no painel da Hostinger, também libere a faixa de portas 1000
 - **10000-10099**: Streams de rádio (portas externas, mapeadas para 8000-8099 internas)
 
 ### Produção
-- **10080**: HTTP interno (Traefik expõe apenas 443)
-- **10443**: HTTPS interno (Traefik expõe apenas 443)
+- **80/443**: HTTP/HTTPS interno (não exposto externamente - Traefik acessa via network Docker)
 - **2022**: SFTP (transferência de arquivos)
 - **10000-10099**: Streams de rádio (portas externas, acessíveis diretamente pelo IP da VPS)
 
@@ -333,7 +332,7 @@ docker compose exec azuracast php azuracast.php version
 
 - **Imagem Oficial**: Usa a imagem oficial monolítica do AzuraCast (`ghcr.io/azuracast/azuracast`)
 - **Desenvolvimento**: Usa portas padrão (80/443) diretamente, sem Traefik
-- **Produção**: Usa portas alternativas (10080/10443) e Traefik como reverse proxy
+- **Produção**: Não expõe portas HTTP/HTTPS (Traefik acessa via network Docker) e Traefik como reverse proxy
 - **Streams**: 
   - **Desenvolvimento**: Portas 8000-8099 (internas e externas)
   - **Produção**: Portas externas 10000-10099 mapeadas para portas internas 8000-8099

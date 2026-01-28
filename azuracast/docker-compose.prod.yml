@@ -40,15 +40,13 @@ services:
       # Service: AzuraCast (HTTP dentro do container na porta 80)
       - "traefik.http.services.azuracast.loadbalancer.server.port=80"
     
-    # IMPORTANTE: Sobrescrever portas para evitar conflitos com Traefik e outras aplicações
-    # O Docker Compose mescla listas de portas, então definimos todas as portas aqui
-    # para garantir que não haja conflitos
+    # IMPORTANTE: Em produção com Traefik, não precisamos expor portas HTTP/HTTPS
+    # O Traefik acessa o container diretamente via network Docker na porta 80 interna
+    # Apenas expomos SFTP e streams que precisam ser acessados diretamente
     ports:
-      - "10080:80"       # HTTP interno (não exposto externamente - Traefik usa network Docker)
-      - "10443:443"      # HTTPS interno (não exposto externamente - Traefik usa network Docker)
       - "2022:2022"      # SFTP
       # Streams: mapeia portas externas 10000-10099 para portas internas 8000-8099
-      # Isso evita conflito com portas 8000 e 9000 que podem estar em uso
+      # Isso evita conflito com portas 8000, 9000 e 10080 que podem estar em uso
       - "10000-10099:8000-8099"
 
 networks:
