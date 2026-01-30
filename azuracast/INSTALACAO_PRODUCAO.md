@@ -137,7 +137,7 @@ Você deve ver o banco `azuracast` na lista.
 ## Acessar a Interface Web
 
 Após a instalação completa:
-1. Acesse `https://radio.gwan.com.br`
+1. Acesse `https://cast.gwan.com.br`
 2. Você deve ver a tela de criação do usuário administrador
 3. Se não aparecer, verifique os logs para erros
 
@@ -197,7 +197,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f web
 
 1. **Acesse no navegador:**
    ```
-   https://radio.gwan.com.br
+   https://cast.gwan.com.br
    ```
 
 2. **O que você deve ver:**
@@ -207,7 +207,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f web
 
 3. **Verificar resposta HTTP:**
    ```bash
-   curl -I https://radio.gwan.com.br
+   curl -I https://cast.gwan.com.br
    # Deve retornar: HTTP/2 200 ou HTTP/2 302
    ```
 
@@ -249,13 +249,13 @@ Marque cada item após verificar:
 - [ ] Redis está rodando dentro do container (`service redis-server status`)
 - [ ] Banco de dados `azuracast` existe e tem tabelas
 - [ ] Logs mostram "Services started up and ready!"
-- [ ] Site `https://radio.gwan.com.br` está acessível
+- [ ] Site `https://cast.gwan.com.br` está acessível
 - [ ] Traefik está conseguindo conectar ao container
 - [ ] Portas 2022 (SFTP) e 10000-10099 (streams) estão expostas
 
 ## Erro: Bad Gateway (502)
 
-Se você receber "Bad Gateway" ao acessar `https://radio.gwan.com.br`, siga estes passos:
+Se você receber "Bad Gateway" ao acessar `https://cast.gwan.com.br`, siga estes passos:
 
 ### 1. Verificar se o Container Está na Network Correta
 

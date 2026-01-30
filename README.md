@@ -1,403 +1,659 @@
-# GWAN Radio (AzuraCast + Traefik)
+# GWAN Radio - Plataforma Completa de Rádio Online
 
-Projeto de webradio usando AzuraCast oficial (imagem monolítica) com suporte para desenvolvimento local e produção com Traefik.
+Repositório único contendo a infraestrutura completa da GWAN Reggae Radio, incluindo o backend de gerenciamento (AzuraCast) e o frontend público do portal.
 
-> **Nota sobre Instalação:** Este projeto usa `docker compose` diretamente ao invés do script `docker.sh` oficial do AzuraCast. Isso permite maior controle e integração com Traefik. Os comandos são equivalentes - o script oficial apenas simplifica a execução dos mesmos comandos Docker Compose que usamos aqui.
+## 📋 Índice Rápido
 
-## Estrutura do Projeto
+- [Visão Geral](#visão-geral)
+- [Arquitetura](#arquitetura)
+- [Estrutura do Repositório](#estrutura-do-repositório)
+- [Pré-requisitos](#pré-requisitos)
+- [Instalação Rápida](#instalação-rápida)
+- [Projeto AzuraCast](#projeto-azuracast-backend)
+- [Projeto Frontend](#projeto-frontend-portal-web)
+- [Deploy em Produção](#deploy-em-produção)
+- [URLs e Endpoints](#urls-e-endpoints)
+- [Troubleshooting](#troubleshooting)
+- [Documentação Adicional](#documentação-adicional)
+
+## 🎯 Visão Geral
+
+Este repositório contém dois projetos principais que trabalham juntos para fornecer uma plataforma completa de rádio online:
+
+1. **AzuraCast** (`azuracast/`) - Sistema de gerenciamento de rádio online (backend)
+2. **Frontend** (`gwan-radio-frontend/`) - Portal web público com player de rádio integrado
+
+### Funcionalidades Principais
+
+- 🎵 **Streaming de Áudio**: Transmissão de rádio 24/7 via AzuraCast
+- 🎨 **Portal Web**: Site público com player de rádio fixo, notícias, agenda de eventos e galeria de artistas
+- 📱 **Responsivo**: Interface adaptada para desktop e mobile
+- 🔐 **Autenticação**: Sistema de login e registro (mantido da arquitetura original)
+- 🤖 **Chatbot**: Sistema de chatbot integrado
+- 📊 **Painel Administrativo**: Gerenciamento completo via AzuraCast
+
+## 🏗️ Arquitetura
+
+### Diagrama de Arquitetura
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Usuários/Visitantes                      │
+└────────────────────┬───────────────────────────────────────┘
+                     │
+         ┌───────────┴───────────┐
+         │                       │
+         ▼                       ▼
+┌─────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│ radio.gwan.com.br│    │ cast.gwan.com.br │    │ stream.gwan.com.br│
+│   (Frontend)     │    │   (AzuraCast)    │    │    (Stream)      │
+│                  │    │                  │    │                  │
+│  React + Vite    │    │  Painel Admin    │    │  Stream de Áudio │
+│  Player Fixo     │───▶│  API REST        │    │  (Porta 8000)    │
+│  Portal Web      │    │                  │    │                  │
+└─────────────────┘    └──────────────────┘    └──────────────────┘
+         │                       │
+         │                       │
+         │         ┌─────────────┘
+         │         │
+         ▼         ▼
+┌─────────────────────────────────┐
+│      Traefik (Reverse Proxy)    │
+│  - SSL/TLS (Let's Encrypt)      │
+│  - Roteamento por Host          │
+└─────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────┐
+│    Docker Network: gwan         │
+│  - Comunicação entre serviços   │
+└─────────────────────────────────┘
+```
+
+### Fluxo de Dados
+
+1. **Usuário acessa** `radio.gwan.com.br` → Frontend React (Portal público servido por Nginx/Node)
+2. **Frontend carrega** → Busca informações "now playing" de `cast.gwan.com.br/api/nowplaying`
+3. **Usuário clica em play** → Conecta ao stream em `stream.gwan.com.br/listen/gwan_radio/stream` (sem porta no URL, via Traefik)
+4. **Administrador acessa** `cast.gwan.com.br` → Painel AzuraCast para gerenciar conteúdo
+
+### URLs de Produção
+
+- **Frontend (Portal Público)**: `https://radio.gwan.com.br` - Portal React servido por Nginx/Node
+- **AzuraCast (Painel Admin + API)**: `https://cast.gwan.com.br` - Painel administrativo e API REST
+- **Stream de Áudio**: `https://stream.gwan.com.br/listen/gwan_radio/stream` - Stream via Traefik roteando para porta 8000 (sem porta no URL)
+- **API Now Playing**: `https://cast.gwan.com.br/api/nowplaying/gwan_radio`
+
+## 📁 Estrutura do Repositório
 
 ```
 gwan-radio/
-  azuracast/
-    docker-compose.yml          # Configuração base (desenvolvimento local)
-    docker-compose.prod.yml     # Override para produção (com Traefik)
-    .env                        # Variáveis de ambiente básicas
-    azuracast.env              # Variáveis de ambiente do AzuraCast
-  README.md
+├── azuracast/                    # Backend da rádio (AzuraCast)
+│   ├── docker-compose.yml        # Configuração base (desenvolvimento local)
+│   ├── docker-compose.prod.yml   # Override para produção (com Traefik)
+│   ├── docker-compose.install.yml # Stack temporário para instalação inicial
+│   ├── .env                       # Variáveis de ambiente básicas
+│   ├── .env.prod                 # Variáveis de ambiente para produção
+│   ├── azuracast.env             # Variáveis de ambiente do AzuraCast
+│   ├── custom/                   # Customizações CSS/JS do AzuraCast
+│   │   ├── custom.css
+│   │   ├── custom.js
+│   │   └── README.md
+│   ├── INSTALACAO_PRODUCAO.md    # Guia detalhado de instalação em produção
+│   ├── SOLUCAO_ERRO_MARIADB.md   # Guia de solução de problemas do MariaDB
+│   └── CRIAR_VOLUMES_PORTAINER.md # Guia para criar volumes no Portainer
+│
+├── gwan-radio-frontend/          # Frontend do portal
+│   ├── src/                      # Código fonte
+│   │   ├── presentation/         # Camada de apresentação
+│   │   │   ├── pages/           # Páginas da aplicação
+│   │   │   ├── components/      # Componentes específicos
+│   │   │   └── contexts/       # Contextos React (RadioContext)
+│   │   ├── domain/              # Camada de domínio
+│   │   ├── application/         # Camada de aplicação
+│   │   ├── infrastructure/      # Camada de infraestrutura
+│   │   └── shared/              # Código compartilhado
+│   ├── docker-compose.yml       # Configuração Docker para produção
+│   ├── docker-compose-production.yml # Configuração alternativa
+│   ├── .env.example             # Exemplo de variáveis de ambiente
+│   ├── package.json             # Dependências Node.js
+│   └── README.md                # Documentação específica do frontend
+│
+└── README.md                     # Este arquivo
 ```
 
-## Sobre a Imagem Oficial
-
-Este projeto usa a **imagem oficial do AzuraCast** (`ghcr.io/azuracast/azuracast`), que é uma imagem monolítica contendo:
-- AzuraCast (aplicação web)
-- MariaDB (banco de dados)
-- Redis (cache)
-- InfluxDB (métricas)
-- Todos os serviços necessários em um único container
-
-Isso simplifica a configuração e evita problemas de conectividade entre serviços.
-
-## Pré-requisitos
+## 🔧 Pré-requisitos
 
 ### Desenvolvimento Local
-- Docker + Docker Compose Plugin
-- Portas 80, 443, 2022 (SFTP), 8000-8099 disponíveis
+
+- **Docker** + Docker Compose Plugin
+- **Node.js** 18+ (para desenvolvimento do frontend)
+- **npm** ou **yarn**
+- Portas disponíveis:
+  - `80`, `443` (HTTP/HTTPS)
+  - `2022` (SFTP)
+  - `8000-8099` (Streams)
+  - `5173` (Vite dev server - frontend)
 
 ### Produção
-- Docker + Docker Compose Plugin
-- Traefik rodando e com network externa `gwan` criada
-- DNS: `radio.gwan.com.br` apontando para o IP da VPS
-- Firewall: Portas 10000-10099 liberadas para streams (mapeadas externamente)
 
-## Desenvolvimento Local
+- **Docker** + Docker Compose Plugin
+- **Traefik** rodando como reverse proxy
+- **Network Docker** `gwan` criada: `docker network create gwan`
+- **DNS configurado**:
+  - `cast.gwan.com.br` → IP da VPS (AzuraCast)
+  - `radio.gwan.com.br` → IP da VPS (Frontend)
+- **Firewall** liberando portas `10000-10099` (streams)
 
-### Primeira Instalação
+## 🚀 Instalação Rápida
 
-**IMPORTANTE:** Na primeira vez, você precisa executar o comando de instalação antes de subir os containers:
+### Desenvolvimento Local
+
+#### 1. AzuraCast (Backend)
 
 ```bash
+# Clone o repositório (se ainda não tiver)
+git clone <repository-url>
+cd gwan-radio
+
+# Entre no diretório do AzuraCast
 cd azuracast
 
-# 1. Executar instalação inicial (cria o banco de dados e configura tudo)
+# Primeira instalação (OBRIGATÓRIO na primeira vez)
 docker compose run --rm web -- azuracast_install
 
-# 2. Subir os containers
+# Subir os serviços
 docker compose up -d
+
+# Verificar logs
+docker compose logs -f web
 ```
 
-O comando `azuracast_install` irá:
-- Inicializar o banco de dados MariaDB
-- Criar todas as tabelas necessárias
-- Configurar o sistema
-- Preparar o ambiente para uso
+**Acesse**: `http://localhost` (criar usuário admin e primeira estação)
 
-**Atenção:** Este comando pode levar alguns minutos na primeira execução.
+#### 2. Frontend
 
-### Subir os serviços (após instalação inicial)
+```bash
+# Volte para a raiz do projeto
+cd ../gwan-radio-frontend
 
-Após a primeira instalação, você pode simplesmente usar:
+# Instale as dependências
+npm install
+
+# Configure variáveis de ambiente
+cp .env.example .env
+# Edite .env e configure:
+# VITE_STREAM_URL=http://localhost:8000/listen/gwan_radio/stream
+# VITE_NOW_PLAYING_URL=http://localhost/api/nowplaying/gwan_radio
+
+# Inicie o servidor de desenvolvimento
+npm run dev
+```
+
+**Acesse**: `http://localhost:5173`
+
+### Produção
+
+Veja a seção [Deploy em Produção](#deploy-em-produção) abaixo.
+
+## 🎛️ Projeto AzuraCast (Backend)
+
+### Descrição
+
+Sistema de gerenciamento de rádio online baseado no AzuraCast oficial. Utiliza a imagem monolítica oficial que contém todos os serviços necessários em um único container:
+
+- **AzuraCast** (aplicação web)
+- **MariaDB** (banco de dados)
+- **Redis** (cache)
+- **InfluxDB** (métricas)
+
+### Tecnologias
+
+- Docker & Docker Compose
+- AzuraCast (imagem oficial: `ghcr.io/azuracast/azuracast`)
+- Traefik (produção)
+
+### Funcionalidades
+
+- Gerenciamento de estações de rádio
+- Upload e organização de músicas
+- Programação automática (AutoDJ)
+- Transmissão de stream (Icecast/Shoutcast)
+- API REST para integração
+- Painel administrativo completo
+- Estatísticas e métricas
+
+### Instalação Detalhada
+
+#### Desenvolvimento Local
 
 ```bash
 cd azuracast
+
+# 1. Instalação inicial (primeira vez apenas)
+docker compose run --rm web -- azuracast_install
+
+# 2. Subir serviços
 docker compose up -d
+
+# 3. Verificar status
+docker compose ps
+
+# 4. Ver logs
+docker compose logs -f web
 ```
 
-### Acessar
-
-- Interface web: `http://localhost` ou `http://localhost:80`
-- Streams: Portas 8000-8099
-
-### Ver logs
-
-```bash
-docker compose logs -f --tail=200 azuracast
-```
-
-Ou usando o nome do container:
-
-```bash
-docker compose logs -f --tail=200 web
-```
-
-### Parar os serviços
-
-```bash
-docker compose down
-```
-
-## Produção (VPS Hostinger KVM4)
-
-### 1. Preparação
-
-Certifique-se de que:
-- Traefik está rodando
-- Network `gwan` existe: `docker network create gwan` (se necessário)
-- DNS `radio.gwan.com.br` aponta para o IP da VPS
-- Firewall libera portas 10000-10099 (portas externas para streams)
-
-### 2. Configurar variáveis de ambiente
-
-**IMPORTANTE:** Para evitar conflito de portas com o Traefik, você precisa usar portas alternativas.
-
-**Opção 1 (Recomendada):** Copie o arquivo `.env.prod` para `.env`:
-```bash
-cd azuracast
-cp .env.prod .env
-```
-
-**Opção 2:** Edite `azuracast/.env` manualmente e ajuste as portas:
-```env
-AZURACAST_HTTP_PORT=10080
-AZURACAST_HTTPS_PORT=10443
-```
-
-**Nota:** O arquivo `docker-compose.prod.yml` não expõe portas HTTP/HTTPS (apenas SFTP e streams). O Traefik acessa o container diretamente via network Docker na porta 80 interna, então não há necessidade de expor essas portas externamente. Isso evita conflitos de portas.
-
-### 3. Primeira Instalação (se for a primeira vez)
-
-**IMPORTANTE:** Na primeira vez em produção, você DEVE executar o comando de instalação ANTES de subir os containers:
-
-#### Via SSH (Recomendado):
+#### Produção
 
 ```bash
 cd azuracast
 
-# 1. Executar instalação inicial (cria o banco de dados e configura tudo)
+# 1. Verificar network do Traefik
+docker network create gwan  # Se não existir
+
+# 2. Instalação inicial (primeira vez apenas)
 docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm web -- azuracast_install
 
-# 2. Subir os serviços
+# 3. Subir serviços
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# 4. Verificar logs
+docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f web
 ```
 
-#### Via Portainer:
+**Acesse**: `https://cast.gwan.com.br`
 
-1. **Parar o stack `gwan-radio`** (se estiver rodando)
-2. **Criar um novo stack temporário** chamado `azuracast-install`:
-   - Vá em **Stacks** → **Add stack**
-   - **Name**: `azuracast-install`
-   - Use o arquivo `docker-compose.install.yml` (veja abaixo)
-   - Clique em **Deploy the stack**
-3. **Aguardar conclusão** (2-5 minutos)
-4. **Verificar logs** em **Containers** → `azuracast-install` → **Logs**
-5. **Remover o stack temporário** após sucesso
-6. **Subir o stack `gwan-radio`** normalmente
+### Portas Utilizadas
 
-**Arquivo `docker-compose.install.yml`** está disponível no repositório para uso no Portainer.
+- **Desenvolvimento**: `80` (HTTP), `443` (HTTPS), `2022` (SFTP), `8000-8099` (Streams)
+- **Produção**: `2022` (SFTP), `10000-10099` (Streams externas → `8000-8099` internas)
 
-**Atenção:** O comando `azuracast_install` pode levar alguns minutos na primeira execução. Ele irá:
-- Inicializar o banco de dados MariaDB
-- Criar todas as tabelas necessárias
-- Configurar o sistema
-- Preparar o ambiente para uso
+### Documentação Específica
 
-### 4. Subir os serviços (após instalação inicial)
+- [Guia de Instalação em Produção](azuracast/INSTALACAO_PRODUCAO.md)
+- [Solução de Erros do MariaDB](azuracast/SOLUCAO_ERRO_MARIADB.md)
+- [Criar Volumes no Portainer](azuracast/CRIAR_VOLUMES_PORTAINER.md)
+- [Personalização CSS/JS](azuracast/custom/README.md)
+
+## 🎨 Projeto Frontend (Portal Web)
+
+### Descrição
+
+Portal web público da GWAN Reggae Radio desenvolvido em React com TypeScript, seguindo Clean Architecture e princípios SOLID. Inclui player de rádio fixo, sistema de notícias, agenda de eventos e galeria de artistas.
+
+### Tecnologias
+
+- **React 18** - Biblioteca UI
+- **TypeScript** - Tipagem estática
+- **Vite** - Build tool e dev server
+- **React Router DOM** - Roteamento
+- **Tailwind CSS** - Estilização
+- **shadcn/ui** - Componentes UI
+- **React Query** - Gerenciamento de estado servidor
+- **React Helmet Async** - SEO e meta tags
+- **Zod** - Validação de esquemas
+- **React Hook Form** - Formulários
+
+### Funcionalidades
+
+- 🎵 **Player de Rádio Fixo**: Player persistente no rodapé com controle de volume
+- 📰 **Notícias**: Sistema de notícias sobre reggae, festivais e cultura
+- 📅 **Agenda**: Agenda de eventos com filtros por cidade e mês
+- 🎤 **Artistas**: Galeria de artistas brasileiros e internacionais
+- 📖 **Sobre**: Página sobre a rádio
+- 🔐 **Autenticação**: Sistema de login e registro
+- 🤖 **Chatbot**: Sistema de chatbot para interação
+
+### Instalação Detalhada
+
+#### Desenvolvimento Local
+
+```bash
+cd gwan-radio-frontend
+
+# 1. Instalar dependências
+npm install
+
+# 2. Configurar variáveis de ambiente
+cp .env.example .env
+
+# 3. Editar .env com URLs locais do AzuraCast
+# VITE_STREAM_URL=http://localhost:8000/listen/gwan_radio/stream
+# VITE_NOW_PLAYING_URL=http://localhost/api/nowplaying/gwan_radio
+# Em produção, use:
+# VITE_STREAM_URL=https://stream.gwan.com.br/listen/gwan_radio/stream
+# VITE_NOW_PLAYING_URL=https://cast.gwan.com.br/api/nowplaying/gwan_radio
+# Em produção, use:
+# VITE_STREAM_URL=https://stream.gwan.com.br/listen/gwan_radio/stream
+# VITE_NOW_PLAYING_URL=https://cast.gwan.com.br/api/nowplaying/gwan_radio
+
+# 4. Iniciar servidor de desenvolvimento
+npm run dev
+```
+
+**Acesse**: `http://localhost:5173`
+
+#### Build para Produção
+
+```bash
+cd gwan-radio-frontend
+
+# 1. Configurar variáveis de ambiente para produção
+# Edite .env ou crie .env.production:
+# VITE_STREAM_URL=https://stream.gwan.com.br/listen/gwan_radio/stream
+# VITE_NOW_PLAYING_URL=https://cast.gwan.com.br/api/nowplaying/gwan_radio
+
+# 2. Build
+npm run build
+
+# 3. Preview da build
+npm run preview
+```
+
+### Variáveis de Ambiente
+
+Crie um arquivo `.env` na raiz do projeto frontend:
+
+```env
+# URLs do AzuraCast
+# Stream de áudio (via Traefik, sem porta no URL)
+VITE_STREAM_URL=https://stream.gwan.com.br/listen/gwan_radio/stream
+
+# API do AzuraCast (admin e API REST)
+VITE_NOW_PLAYING_URL=https://cast.gwan.com.br/api/nowplaying/gwan_radio
+
+# URL base da API (se houver backend separado)
+VITE_API_BASE_URL=http://localhost:3000/api
+```
+
+### Estrutura de Arquitetura
+
+O projeto segue **Clean Architecture** adaptada para frontend:
+
+- **Domain**: Entidades e interfaces de repositórios
+- **Application**: Casos de uso, DTOs e validadores
+- **Infrastructure**: Implementações de repositórios, HTTP client, logging
+- **Presentation**: Componentes React, páginas, hooks e contextos
+
+### Documentação Específica
+
+- [README do Frontend](gwan-radio-frontend/README.md)
+- [Arquitetura e Padrões](gwan-radio-frontend/.cursorrules)
+
+## 🚀 Deploy em Produção
+
+### Checklist Pré-Deploy
+
+- [ ] Traefik está rodando e configurado
+- [ ] Network `gwan` existe: `docker network create gwan`
+- [ ] DNS `cast.gwan.com.br` aponta para IP da VPS (AzuraCast admin/API)
+- [ ] DNS `radio.gwan.com.br` aponta para IP da VPS (Frontend)
+- [ ] DNS `stream.gwan.com.br` aponta para IP da VPS (Stream de áudio)
+- [ ] Firewall libera portas `10000-10099` (streams adicionais, se necessário)
+- [ ] Portas `80` e `443` estão disponíveis para Traefik
+
+### 1. Deploy do AzuraCast
 
 ```bash
 cd azuracast
+
+# Verificar network
+docker network inspect gwan
+
+# Primeira instalação (se for primeira vez)
+docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm web -- azuracast_install
+
+# Subir serviços
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# Verificar logs
+docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f web
 ```
 
-### 5. Acessar
+**Acesse**: `https://cast.gwan.com.br` e crie o usuário administrador.
 
-- Interface web: `https://radio.gwan.com.br` (via Traefik)
-- HTTP será automaticamente redirecionado para HTTPS
-- Streams: Portas externas 10000-10099 (mapeadas para portas internas 8000-8099)
+### 2. Deploy do Frontend
 
-### 5. Ver logs
+#### Opção A: Docker Compose (Recomendado)
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f --tail=200 azuracast
+cd gwan-radio-frontend
+
+# Build e deploy
+docker compose up -d --build
+
+# Verificar logs
+docker compose logs -f frontend
 ```
 
-Ou usando o nome do container:
+#### Opção B: Build Manual + Servidor Web
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f --tail=200 web
+cd gwan-radio-frontend
+
+# 1. Configurar .env.production
+cp .env.example .env.production
+# Edite .env.production com URLs de produção
+
+# 2. Build
+npm run build
+
+# 3. Servir arquivos estáticos (dist/) com nginx/apache
+# Ou usar Vercel/Netlify apontando para o diretório dist/
 ```
 
-### 7. Parar os serviços
+**Acesse**: `https://radio.gwan.com.br`
+
+### 3. Verificação Pós-Deploy
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml down
+# Verificar containers rodando
+docker ps | grep -E "azuracast|gwan-radio"
+
+# Verificar network
+docker network inspect gwan
+
+# Testar conectividade
+curl -I https://cast.gwan.com.br
+curl -I https://radio.gwan.com.br
+curl -I https://stream.gwan.com.br
+
+# Verificar logs
+docker compose -f docker-compose.yml -f docker-compose.prod.yml logs azuracast
+docker compose logs frontend
 ```
 
-## Primeiro Acesso
+## 🌐 URLs e Endpoints
 
-### Desenvolvimento Local
+### URLs de Produção
 
-1. Acesse `http://localhost`
-2. Crie o usuário administrador
-3. Crie a primeira estação de rádio
+| Serviço | URL | Descrição |
+|---------|-----|-----------|
+| Frontend | `https://radio.gwan.com.br` | Portal público da rádio (React + Vite servido por Nginx/Node) |
+| AzuraCast Admin | `https://cast.gwan.com.br` | Painel administrativo e API REST |
+| Stream | `https://stream.gwan.com.br/listen/gwan_radio/stream` | Stream de áudio via Traefik (sem porta no URL) |
 
-### Produção
+### APIs do AzuraCast
 
-1. Acesse `https://radio.gwan.com.br`
-2. Crie o usuário administrador
-3. Crie a primeira estação de rádio
-4. Em **Admin → Settings**, verifique a **Base URL** (deve ser `https://radio.gwan.com.br`)
+| Endpoint | Descrição |
+|----------|-----------|
+| `/api/nowplaying/{station}` | Informações da música tocando agora |
+| `/api/stations` | Lista de estações |
+| `/api/station/{id}` | Detalhes de uma estação |
 
-## Configuração de Firewall
-
-### UFW (Ubuntu/Debian)
+### Exemplo de Uso da API
 
 ```bash
-# Liberar portas para streams (portas externas em produção)
-sudo ufw allow 10000:10099/tcp
+# Buscar música tocando agora
+curl https://cast.gwan.com.br/api/nowplaying/gwan_radio
+
+# Resposta esperada:
+# {
+#   "now_playing": {
+#     "song": {
+#       "title": "Nome da Música",
+#       "artist": "Nome do Artista",
+#       "art": "URL da capa do álbum"
+#     }
+#   },
+#   "listeners": {
+#     "current": 42
+#   }
+# }
+```
+
+## 🔍 Troubleshooting
+
+### Problemas Comuns
+
+#### AzuraCast não inicia
+
+**Erro**: `Table 'mysql.db' doesn't exist`
+
+**Solução**: Execute o comando de instalação inicial:
+```bash
+cd azuracast
+docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm web -- azuracast_install
+```
+
+Veja mais detalhes em: [SOLUCAO_ERRO_MARIADB.md](azuracast/SOLUCAO_ERRO_MARIADB.md)
+
+#### Frontend não conecta ao stream
+
+**Verificar**:
+1. Variáveis de ambiente estão corretas no `.env`
+2. AzuraCast está rodando e acessível
+3. Stream está configurado no AzuraCast
+4. Portas de stream estão abertas no firewall
+
+#### Traefik não roteia corretamente
+
+**Verificar**:
+1. Network `gwan` existe: `docker network create gwan`
+2. Containers estão na network: `docker network inspect gwan`
+3. Labels do Traefik estão corretas nos docker-compose
+4. DNS está apontando para o IP correto
+
+#### Player não mostra "now playing"
+
+**Verificar**:
+1. URL da API está correta: `VITE_NOW_PLAYING_URL`
+2. CORS está habilitado no AzuraCast (se necessário)
+3. Console do navegador para erros de CORS/network
+
+### Comandos Úteis
+
+```bash
+# Ver logs do AzuraCast
+cd azuracast
+docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f web
+
+# Ver logs do Frontend
+cd gwan-radio-frontend
+docker compose logs -f frontend
+
+# Reiniciar serviços
+docker compose restart
 
 # Verificar status
-sudo ufw status
-```
-
-### Hostinger Firewall
-
-Se houver firewall no painel da Hostinger, também libere a faixa de portas 10000-10099 (portas externas para streams).
-
-## Portas Utilizadas
-
-### Desenvolvimento Local
-- **80**: HTTP (interface web)
-- **443**: HTTPS (interface web)
-- **2022**: SFTP (transferência de arquivos)
-- **10000-10099**: Streams de rádio (portas externas, mapeadas para 8000-8099 internas)
-
-### Produção
-- **80/443**: HTTP/HTTPS interno (não exposto externamente - Traefik acessa via network Docker)
-- **2022**: SFTP (transferência de arquivos)
-- **10000-10099**: Streams de rádio (portas externas, acessíveis diretamente pelo IP da VPS)
-
-## Troubleshooting
-
-### Erro: "Table 'mysql.db' doesn't exist" ou "Can't open and lock privilege tables"
-
-Se você receber erros como:
-```
-ERROR: Can't open and lock privilege tables: Table 'mysql.db' doesn't exist
-ERROR: Fatal error: Can't open and lock privilege tables
-ERROR: Could not open mysql.plugin table: "Table 'mysql.plugin' doesn't exist"
-```
-
-Isso indica que o volume do banco de dados está corrompido ou não foi inicializado corretamente.
-
-**Solução para Desenvolvimento Local:**
-
-1. **Parar todos os containers:**
-   ```bash
-   cd azuracast
-   docker compose down
-   ```
-
-2. **Remover o volume do banco de dados:**
-   ```bash
-   docker volume rm azuracast_db_data
-   ```
-   
-   Ou, se preferir remover todos os volumes (cuidado: apaga todos os dados!):
-   ```bash
-   docker compose down -v
-   ```
-
-3. **Executar instalação inicial:**
-   ```bash
-   docker compose run --rm web -- azuracast_install
-   ```
-
-4. **Subir os containers:**
-   ```bash
-   docker compose up -d
-   ```
-
-5. **Aguardar a inicialização completa (pode levar 2-5 minutos):**
-   ```bash
-   docker compose logs -f web
-   ```
-
-**Solução para Produção:**
-
-1. **Parar todos os containers:**
-   ```bash
-   cd azuracast
-   docker compose -f docker-compose.yml -f docker-compose.prod.yml down
-   ```
-
-2. **Remover o volume do banco de dados:**
-   ```bash
-   docker volume rm azuracast_db_data
-   ```
-   
-   Ou, se preferir remover todos os volumes (cuidado: apaga todos os dados!):
-   ```bash
-   docker compose -f docker-compose.yml -f docker-compose.prod.yml down -v
-   ```
-
-3. **Executar instalação inicial:**
-   ```bash
-   docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm web -- azuracast_install
-   ```
-
-4. **Subir os containers:**
-   ```bash
-   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-   ```
-
-5. **Aguardar a inicialização completa (pode levar 2-5 minutos):**
-   ```bash
-   docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f web
-   ```
-
-**Nota:** O comando `azuracast_install` é ESSENCIAL na primeira vez. Ele:
-- Inicializa o MariaDB e cria as tabelas do sistema
-- Cria o banco de dados `azuracast`
-- Executa as migrations
-- Configura o sistema
-
-Se o problema persistir após 5 minutos, verifique:
-- Espaço em disco suficiente: `df -h`
-- Logs completos: `docker compose logs web` (ou com `-f` para produção)
-- Permissões do volume Docker
-
-### Erro: "Table 'azuracast.settings' doesn't exist"
-
-Se você receber o erro:
-```
-SQLSTATE[42S02]: Base table or view not found: 1146 Table 'azuracast.settings' doesn't exist
-```
-
-Isso indica que o AzuraCast está tentando executar o setup antes do banco estar completamente pronto.
-
-**Solução:** Siga os mesmos passos acima para limpar e recriar os volumes.
-
-### Erro de network no Traefik
-
-Se receber erro sobre network `gwan` não encontrada:
-
-```bash
-docker network create gwan
-```
-
-### Verificar se os serviços estão rodando
-
-```bash
 docker compose ps
-```
 
-### Reiniciar o container
-
-```bash
-docker compose restart azuracast
-```
-
-Ou usando o nome do serviço:
-
-```bash
-docker compose restart web
-```
-
-### Limpar volumes (cuidado: apaga dados!)
-
-```bash
+# Limpar volumes (CUIDADO: apaga dados!)
 docker compose down -v
 ```
 
-## Comandos Úteis
+### Documentação de Troubleshooting
 
-### Backup
+- [Instalação em Produção](azuracast/INSTALACAO_PRODUCAO.md) - Guia completo
+- [Solução de Erros MariaDB](azuracast/SOLUCAO_ERRO_MARIADB.md) - Problemas comuns do banco
+- [Criar Volumes no Portainer](azuracast/CRIAR_VOLUMES_PORTAINER.md) - Se usar Portainer
 
-Os backups são salvos automaticamente em `azuracast_backups` volume. Para fazer backup manual:
+## 📚 Documentação Adicional
 
-```bash
-docker compose exec azuracast azuracast_cli azuracast:backup
-```
+### Documentação do AzuraCast
+
+- [Guia de Instalação em Produção](azuracast/INSTALACAO_PRODUCAO.md)
+- [Solução de Erros do MariaDB](azuracast/SOLUCAO_ERRO_MARIADB.md)
+- [Criar Volumes no Portainer](azuracast/CRIAR_VOLUMES_PORTAINER.md)
+- [Personalização CSS/JS](azuracast/custom/README.md)
+
+### Documentação do Frontend
+
+- [README do Frontend](gwan-radio-frontend/README.md) - Documentação completa
+- [Arquitetura e Padrões](gwan-radio-frontend/.cursorrules) - Padrões de código
+
+### Documentação Externa
+
+- [AzuraCast Official Docs](https://www.azuracast.com/docs/)
+- [Traefik Documentation](https://doc.traefik.io/traefik/)
+- [React Documentation](https://react.dev/)
+- [Vite Documentation](https://vitejs.dev/)
+
+## 🔄 Manutenção
 
 ### Atualizar AzuraCast
 
 ```bash
-docker compose pull
-docker compose up -d
+cd azuracast
+docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
 
-### Verificar versão
+### Atualizar Frontend
 
 ```bash
-docker compose exec azuracast php azuracast.php version
+cd gwan-radio-frontend
+git pull
+npm install
+npm run build
+# Reiniciar container ou servidor web
 ```
 
-## Notas Importantes
+### Backup
 
-- **Imagem Oficial**: Usa a imagem oficial monolítica do AzuraCast (`ghcr.io/azuracast/azuracast`)
-- **Desenvolvimento**: Usa portas padrão (80/443) diretamente, sem Traefik
-- **Produção**: Não expõe portas HTTP/HTTPS (Traefik acessa via network Docker) e Traefik como reverse proxy
-- **Streams**: 
-  - **Desenvolvimento**: Portas 8000-8099 (internas e externas)
-  - **Produção**: Portas externas 10000-10099 mapeadas para portas internas 8000-8099
-- **Volumes**: Dados são persistidos em volumes Docker nomeados
-- **Serviços Internos**: MariaDB, Redis e InfluxDB estão todos dentro do mesmo container, evitando problemas de conectividade
+Os backups do AzuraCast são salvos automaticamente no volume `azuracast_backups`. Para backup manual:
+
+```bash
+cd azuracast
+docker compose exec web azuracast_cli azuracast:backup
+```
+
+### Logs
+
+```bash
+# Logs do AzuraCast
+cd azuracast
+docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f web
+
+# Logs do Frontend
+cd gwan-radio-frontend
+docker compose logs -f frontend
+```
+
+## 📝 Notas Importantes
+
+- **Imagem Monolítica**: O AzuraCast usa imagem oficial monolítica - todos os serviços (MariaDB, Redis, InfluxDB) estão no mesmo container
+- **Primeira Instalação**: O comando `azuracast_install` é **OBRIGATÓRIO** na primeira vez
+- **Portas de Stream**: Em produção, portas externas `10000-10099` são mapeadas para portas internas `8000-8099`
+- **Traefik**: Em produção, o Traefik acessa os containers via network Docker, não via portas expostas
+- **Volumes**: Dados são persistidos em volumes Docker nomeados - não são perdidos ao recriar containers
+
+## 🤝 Contribuindo
+
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto é privado e proprietário da GWAN.
+
+---
+
+**Desenvolvido com ❤️ para a comunidade reggae brasileira**
+
+Para mais informações, consulte a documentação específica de cada projeto:
+- [AzuraCast](azuracast/INSTALACAO_PRODUCAO.md)
+- [Frontend](gwan-radio-frontend/README.md)

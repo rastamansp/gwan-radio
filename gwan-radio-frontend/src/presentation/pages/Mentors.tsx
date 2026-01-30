@@ -1,0 +1,307 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Search, Star, MapPin } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import Navbar from "@/components/Navbar";
+import { useMentors } from "../hooks/useMentors";
+import { useUserMentors } from "../hooks/useUserMentors";
+import { useAuth } from "@/contexts/AuthContext";
+
+const Mentors = () => {
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const { user, isAuthenticated } = useAuth();
+  const { data: mentors = [], isLoading, error } = useMentors({ searchTerm: searchTerm || undefined });
+  
+  // Busca mentores associados ao usuário se estiver logado
+  const { 
+    data: userMentors = [], 
+    isLoading: isLoadingUserMentors 
+  } = useUserMentors(user?.id || '', 'ACTIVE');
+  
+  // Se o usuário estiver logado, usa os mentores associados, senão usa a lista geral
+  const mentorsToDisplay = isAuthenticated && user && userMentors.length > 0 
+    ? userMentors.map(um => um.mentor)
+    : mentors;
+  
+  const isLoadingData = isLoading || (isAuthenticated && isLoadingUserMentors);
+
+  const oldMentors = [
+    {
+      id: 1,
+      name: "Ana Silva",
+      role: "Senior Product Manager",
+      company: "Google",
+      specialty: "Product Management",
+      rating: 4.9,
+      reviews: 127,
+      price: 200,
+      location: "São Paulo, SP",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ana",
+      skills: ["Product Strategy", "Agile", "User Research"]
+    },
+    {
+      id: 2,
+      name: "Carlos Santos",
+      role: "Tech Lead",
+      company: "Meta",
+      specialty: "Software Engineering",
+      rating: 4.8,
+      reviews: 98,
+      price: 180,
+      location: "Rio de Janeiro, RJ",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos",
+      skills: ["React", "Node.js", "System Design"]
+    },
+    {
+      id: 3,
+      name: "Marina Costa",
+      role: "Design Director",
+      company: "Nubank",
+      specialty: "UX/UI Design",
+      rating: 5.0,
+      reviews: 156,
+      price: 220,
+      location: "São Paulo, SP",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Marina",
+      skills: ["UI Design", "Design Systems", "Figma"]
+    },
+    {
+      id: 4,
+      name: "Pedro Oliveira",
+      role: "Engineering Manager",
+      company: "Amazon",
+      specialty: "Leadership",
+      rating: 4.7,
+      reviews: 89,
+      price: 250,
+      location: "Belo Horizonte, MG",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Pedro",
+      skills: ["Team Management", "Career Growth", "Technical Leadership"]
+    },
+    {
+      id: 5,
+      name: "Julia Ferreira",
+      role: "Data Science Lead",
+      company: "Microsoft",
+      specialty: "Data Science",
+      rating: 4.9,
+      reviews: 112,
+      price: 210,
+      location: "São Paulo, SP",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Julia",
+      skills: ["Machine Learning", "Python", "Data Analytics"]
+    },
+    {
+      id: 6,
+      name: "Ricardo Almeida",
+      role: "CTO",
+      company: "Startup Tech",
+      specialty: "Startup & Entrepreneurship",
+      rating: 4.8,
+      reviews: 74,
+      price: 300,
+      location: "Florianópolis, SC",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ricardo",
+      skills: ["Startup Strategy", "Fundraising", "Tech Stack"]
+    }
+  ];
+
+  if (isLoadingData) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="pt-24 pb-16 px-4">
+          <div className="container mx-auto">
+            <div className="flex justify-center items-center min-h-[400px]">
+              <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="pt-24 pb-16 px-4">
+          <div className="container mx-auto">
+            <div className="text-center py-16">
+              <p className="text-lg text-destructive mb-4">Erro ao carregar mentores</p>
+              <Button onClick={() => window.location.reload()}>Tentar novamente</Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <div className="pt-24 pb-16 px-4">
+        <div className="container mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold mb-4">
+              {isAuthenticated && userMentors.length > 0 ? 'Meus Mentores' : 'Encontre seu Mentor'}
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              {isAuthenticated && userMentors.length > 0 
+                ? 'Mentores associados à sua conta'
+                : 'Conecte-se com especialistas que podem ajudar você a crescer'}
+            </p>
+          </div>
+
+          {/* Search Bar - apenas se não estiver mostrando mentores associados */}
+          {(!isAuthenticated || userMentors.length === 0) && (
+            <div className="mb-8">
+              <div className="relative max-w-2xl">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Input
+                  type="text"
+                  placeholder="Buscar por nome, especialidade ou habilidade..."
+                  className="pl-12 h-14 text-lg"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Results Count */}
+          <div className="mb-6">
+            <p className="text-muted-foreground">
+              {mentorsToDisplay.length} mentor{mentorsToDisplay.length !== 1 ? 'es' : ''} encontrado{mentorsToDisplay.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+
+          {/* Mentors Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {mentorsToDisplay.map((mentor) => (
+              <Card 
+                key={mentor.id} 
+                className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col h-full"
+                onClick={() => navigate(`/mentor/${mentor.id}`)}
+              >
+                <div className="p-6 flex flex-col flex-1">
+                  {/* Avatar & Basic Info */}
+                  <div className="flex items-start space-x-4 mb-4">
+                    {mentor.avatar ? (
+                      <img
+                        src={mentor.avatar}
+                        alt={mentor.name}
+                        className="w-16 h-16 rounded-full bg-gradient-hero"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-gradient-hero flex items-center justify-center">
+                        <span className="text-white font-semibold text-lg">
+                          {mentor.name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-lg truncate">{mentor.name}</h3>
+                      {mentor.role && (
+                        <p className="text-sm text-muted-foreground truncate">{mentor.role}</p>
+                      )}
+                      {mentor.company && (
+                        <p className="text-sm text-primary font-medium">{mentor.company}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Areas Badge */}
+                  {mentor.areas && mentor.areas.length > 0 && (
+                    <div className="mb-4 flex flex-wrap gap-2">
+                      {mentor.areas.slice(0, 1).map((area, index) => (
+                        <Badge key={index} className="bg-primary/10 text-primary hover:bg-primary/20 text-xs whitespace-nowrap">
+                          {area}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Skills */}
+                  {mentor.skills && mentor.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {mentor.skills.slice(0, 3).map((skill, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs whitespace-nowrap">
+                          {skill}
+                        </Badge>
+                      ))}
+                      {mentor.skills.length > 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{mentor.skills.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Stats */}
+                  <div className="flex items-center justify-between mb-4 text-sm">
+                    {mentor.rating !== null && mentor.rating !== undefined ? (
+                      <div className="flex items-center space-x-1">
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <span className="font-medium">{mentor.rating.toFixed(1)}</span>
+                        <span className="text-muted-foreground">({mentor.reviews || 0})</span>
+                      </div>
+                    ) : (
+                      <div></div>
+                    )}
+                    {mentor.location && (
+                      <div className="flex items-center space-x-1 text-muted-foreground">
+                        <MapPin className="w-4 h-4" />
+                        <span>{mentor.location}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Spacer to push button to bottom */}
+                  <div className="flex-1"></div>
+
+                  {/* CTA */}
+                  <div className="flex justify-end pt-4 border-t border-border mt-auto">
+                    <Button 
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/mentor/${mentor.id}`);
+                      }}
+                    >
+                      Ver Perfil
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          {/* Empty State */}
+          {mentorsToDisplay.length === 0 && (
+            <div className="text-center py-16">
+              <p className="text-lg text-muted-foreground mb-4">
+                {isAuthenticated && userMentors.length === 0
+                  ? 'Você ainda não possui mentores associados'
+                  : 'Nenhum mentor encontrado com esses critérios'}
+              </p>
+              {!isAuthenticated || userMentors.length === 0 ? (
+                <Button variant="outline" onClick={() => setSearchTerm("")}>
+                  Limpar Busca
+                </Button>
+              ) : null}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Mentors;

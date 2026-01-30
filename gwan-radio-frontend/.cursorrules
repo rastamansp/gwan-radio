@@ -1,0 +1,259 @@
+# 🚀 Cursor Rules - Gwan Radio Frontend
+
+## 📋 Visão Geral do Projeto
+
+Este é um projeto React + TypeScript + Vite que implementa o frontend da GWAN Reggae Radio - uma rádio online brasileira dedicada ao reggae, dancehall, roots e dub. O projeto segue os princípios de Clean Architecture, SOLID e melhores práticas de desenvolvimento frontend.
+
+## 🚫 **REGRAS CRÍTICAS - NUNCA VIOLAR**
+
+### ❌ **NUNCA desabilitar funcionalidades essenciais:**
+- ❌ **NUNCA** usar `any` type
+- ❌ **NUNCA** usar `console.log` (usar logger estruturado ou remover)
+- ❌ **NUNCA** remover validações de props
+- ❌ **NUNCA** desabilitar tratamento de erros
+- ❌ **NUNCA** remover interfaces ou tipos TypeScript
+- ❌ **NUNCA** fazer operações síncronas bloqueantes
+- ❌ **NUNCA** misturar lógica de negócio com componentes de UI
+- ❌ **NUNCA** usar `alert()` - sempre usar sonner/toast
+
+### ✅ **SEMPRE corrigir problemas de configuração:**
+- ✅ **SEMPRE** verificar variáveis de ambiente
+- ✅ **SEMPRE** configurar APIs corretamente
+- ✅ **SEMPRE** implementar fallbacks e retry logic
+- ✅ **SEMPRE** usar logging estruturado para debug
+- ✅ **SEMPRE** seguir princípios de resiliência
+- ✅ **SEMPRE** usar sonner para notificações
+
+## 🏗️ Arquitetura e Padrões
+
+### Clean Architecture (Adaptada para Frontend)
+- **Entities**: Tipos e interfaces de domínio (src/domain/entities)
+- **Use Cases**: Casos de uso da aplicação (src/application/use-cases)
+- **Interface Adapters**: Services, API clients, Context providers (src/infrastructure)
+- **Frameworks & Drivers**: React, Vite, Tailwind, Axios (src/presentation)
+
+### SOLID Principles (Adaptados para Frontend)
+- **S**: Single Responsibility Principle (componentes com uma responsabilidade)
+- **O**: Open/Closed Principle (extensível via props, fechado para modificação)
+- **L**: Liskov Substitution Principle (componentes substituíveis)
+- **I**: Interface Segregation Principle (interfaces específicas)
+- **D**: Dependency Inversion Principle (depender de abstrações, não implementações)
+
+### Design Patterns
+- **Repository Pattern**: Para acesso a dados via services
+- **Factory Pattern**: Para criação de objetos complexos
+- **Observer Pattern**: Para gerenciamento de estado (Context API)
+- **Command Pattern**: Para ações do usuário
+- **Provider Pattern**: Para injeção de dependências
+- **Custom Hooks Pattern**: Para lógica de negócio reutilizável
+
+## 📁 Estrutura de Pastas (Clean Architecture)
+
+```
+src/
+├── domain/                      # Camada de Domínio
+│   ├── entities/               # Entidades de negócio
+│   ├── repositories/           # Interfaces dos repositórios
+│   └── errors/                 # Erros de domínio
+├── application/                # Camada de Aplicação
+│   ├── use-cases/             # Casos de uso
+│   ├── dto/                   # Data Transfer Objects
+│   └── validators/            # Validadores Zod
+├── infrastructure/             # Camada de Infraestrutura
+│   ├── repositories/          # Implementações dos repositórios
+│   ├── logging/               # Sistema de logging
+│   └── http/                  # Cliente HTTP
+├── presentation/              # Camada de Apresentação
+│   ├── hooks/                # Custom hooks
+│   ├── components/           # Componentes específicos de páginas
+│   │   ├── RadioPlayer.tsx   # Player de rádio fixo
+│   │   └── NowPlayingWidget.tsx # Widget de música atual
+│   ├── pages/                # Páginas da aplicação
+│   │   ├── Home.tsx          # Página inicial
+│   │   ├── Noticias.tsx      # Lista de notícias
+│   │   ├── NoticiaDetalhe.tsx # Detalhe da notícia
+│   │   ├── Agenda.tsx        # Agenda de eventos
+│   │   ├── Artistas.tsx      # Lista de artistas
+│   │   ├── ArtistaDetalhe.tsx # Detalhe do artista
+│   │   ├── Sobre.tsx         # Sobre a rádio
+│   │   └── TestChatbot.tsx   # Página de teste do chatbot
+│   └── contexts/             # Contextos React
+│       └── RadioContext.tsx  # Contexto do player de rádio
+├── components/               # Componentes globais
+│   ├── Navbar.tsx           # Navegação principal
+│   ├── Footer.tsx            # Rodapé
+│   └── ui/                   # Componentes shadcn/ui
+├── contexts/                 # Contextos globais
+│   └── AuthContext.tsx       # Contexto de autenticação
+├── shared/                   # Código compartilhado
+│   ├── data/                # Dados JSON (notícias, eventos, artistas)
+│   ├── constants/           # Constantes
+│   ├── di/                  # DI Container
+│   └── utils/               # Utilitários
+├── App.tsx                  # Componente principal com Toaster
+├── main.tsx                 # Arquivo de entrada
+└── index.css                # Estilos globais (tema reggae)
+```
+
+## 🎨 Design System - Tema Reggae
+
+O projeto utiliza um tema dark com cores reggae:
+
+- **Primary**: Verde reggae (`hsl(145 63% 42%)`)
+- **Secondary**: Amarelo reggae (`hsl(51 100% 50%)`)
+- **Accent**: Vermelho reggae (`hsl(348 83% 47%)`)
+
+### Classes Utilitárias Reggae
+
+- `.text-gradient-reggae` - Texto com gradiente reggae (verde, amarelo, vermelho)
+- `.bg-gradient-reggae` - Fundo com gradiente reggae
+- `.glow-primary` - Efeito de brilho verde
+- `.glow-accent` - Efeito de brilho vermelho
+- `.pulse-live` - Animação de pulso para indicador "AO VIVO"
+- `.card-hover` - Efeito hover em cards
+
+## 🔧 Padrões de Código
+
+### Nomenclatura
+- **Componentes**: PascalCase (ex: `RadioPlayer`, `NowPlayingWidget`)
+- **Interfaces**: PascalCase com prefixo I (ex: `IRadioContext`) OU sem prefixo (ex: `RadioPlayerProps`)
+- **Funções**: camelCase (ex: `handlePlay`, `fetchNowPlaying`)
+- **Variáveis**: camelCase (ex: `isPlaying`, `nowPlaying`)
+- **Constantes**: UPPER_SNAKE_CASE (ex: `STREAM_URL`, `POLLING_INTERVAL`)
+- **Arquivos**: PascalCase para componentes, camelCase para outros (ex: `RadioPlayer.tsx`, `radioContext.ts`)
+
+### Estrutura de Componentes
+```typescript
+import React from 'react'
+import { toast } from 'sonner'
+// Imports específicos depois dos genéricos
+
+interface RadioPlayerProps {
+  className?: string
+  onPlay?: () => void
+}
+
+export const RadioPlayer: React.FC<RadioPlayerProps> = ({ 
+  className,
+  onPlay
+}) => {
+  // Hooks primeiro
+  const [isPlaying, setIsPlaying] = useState(false)
+  
+  // Handlers com useCallback
+  const handlePlay = useCallback(() => {
+    setIsPlaying(true)
+    onPlay?.()
+  }, [onPlay])
+  
+  // useEffects
+  useEffect(() => {
+    // efeitos
+  }, [])
+  
+  // Render
+  return (
+    <div className={className} onClick={handlePlay}>
+      {/* JSX */}
+    </div>
+  )
+}
+```
+
+## 🎵 Player de Rádio
+
+O RadioPlayer é um componente fixo no rodapé que deve:
+- Persistir entre rotas
+- Manter estado de reprodução
+- Buscar informações "now playing" do AzuraCast
+- Permitir controle de volume
+- Exibir indicador "AO VIVO"
+
+### RadioContext
+
+O contexto gerencia:
+- Estado de reprodução (`isPlaying`, `isLoading`)
+- Volume (`volume`)
+- Informações da música atual (`nowPlaying`)
+- Integração com API do AzuraCast
+- Polling automático para atualizar "now playing"
+
+## 📝 Padrões de Validação
+
+### Validação com Zod
+```typescript
+import { z } from 'zod'
+
+export const NewsSchema = z.object({
+  title: z.string().min(3, 'Título deve ter no mínimo 3 caracteres').max(200),
+  content: z.string().min(10, 'Conteúdo deve ter no mínimo 10 caracteres'),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Data deve estar no formato YYYY-MM-DD'),
+})
+
+export type News = z.infer<typeof NewsSchema>
+```
+
+## 🚫 O que NUNCA fazer
+
+- ❌ **NUNCA** usar `any` type - sempre tipar corretamente
+- ❌ **NUNCA** usar `console.log` - usar logger estruturado
+- ❌ **NUNCA** usar `alert()` - usar sonner/toast
+- ❌ **NUNCA** deixar props sem validação
+- ❌ **NUNCA** misturar lógica de negócio com UI
+- ❌ **NUNCA** usar `var` (sempre `const` ou `let`)
+- ❌ **NUNCA** fazer operações síncronas bloqueantes
+- ❌ **NUNCA** esquecer de tratar erros
+- ❌ **NUNCA** usar variáveis globais
+- ❌ **NUNCA** criar componentes muito grandes (>400 linhas)
+- ❌ **NUNCA** usar `useEffect` sem dependências corretas
+- ❌ **NUNCA** remover validações existentes
+- ❌ **NUNCA** desabilitar tratamento de erros
+- ❌ **NUNCA** remover o RadioPlayer do App.tsx
+
+## ✅ O que SEMPRE fazer
+
+- ✅ Usar TypeScript strict mode
+- ✅ Definir interfaces para todas as props
+- ✅ Usar hooks apropriadamente (useState, useEffect, useCallback, useMemo)
+- ✅ Validar entrada de dados com Zod
+- ✅ Tratar erros adequadamente com try/catch
+- ✅ Usar sonner para notificações
+- ✅ Usar logs estruturados (container.logger)
+- ✅ Seguir princípios SOLID
+- ✅ Implementar Clean Architecture
+- ✅ Usar React.memo quando apropriado
+- ✅ Usar useCallback e useMemo quando necessário
+- ✅ Separar lógica de negócio de UI
+- ✅ Criar custom hooks para lógica reutilizável
+- ✅ Organizar imports: React → Third-party → Internal
+- ✅ Usar PascalCase para componentes e interfaces
+- ✅ Manter RadioPlayer fixo no rodapé
+- ✅ Usar react-helmet-async para SEO em todas as páginas
+
+## 📚 Bibliotecas e Ferramentas
+
+### Principais
+- **React 18**: Biblioteca UI
+- **TypeScript**: Tipagem estática
+- **Vite**: Build tool
+- **React Router DOM**: Roteamento
+- **Tailwind CSS**: Estilização
+- **shadcn/ui**: Componentes UI
+- **React Query**: Gerenciamento de estado servidor
+- **React Helmet Async**: SEO e meta tags
+- **Zod**: Validação de esquemas
+- **date-fns**: Manipulação de datas
+- **Lucide React**: Ícones
+- **React Hook Form**: Formulários
+- **Sonner**: Sistema de notificações
+
+### Arquitetura
+- Clean Architecture adaptada para frontend
+- SOLID Principles
+- Repository Pattern
+- Dependency Injection
+- Custom Hooks Pattern
+
+---
+
+**Lembre-se**: Este arquivo define os padrões do projeto frontend da GWAN Radio. Sempre consulte antes de implementar novas funcionalidades para garantir consistência e qualidade do código. **NUNCA desabilite funcionalidades essenciais - sempre corrija os problemas de configuração!**

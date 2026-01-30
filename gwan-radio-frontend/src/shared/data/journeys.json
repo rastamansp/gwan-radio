@@ -1,0 +1,78 @@
+{
+  "journey": [
+    {
+      "name": "0 - Confirmação de Cadastro",
+      "description": "Mensagem automática de confirmação de cadastro enviada via WhatsApp para novos usuários cadastrados",
+      "messages": [
+        { "from": "concierge", "text": "Olá! 👋\n\nSeja muito bem-vindo ao MentorMatch!" },
+        { "from": "concierge", "text": "Você acaba de ser cadastrado na nossa plataforma e estamos muito felizes em tê-lo conosco." },
+        { "from": "concierge", "text": "O MentorMatch é uma plataforma que conecta profissionais em busca de mentoria com mentores experientes de diversas áreas." },
+        { "from": "concierge", "text": "Como posso ajudá-lo hoje?\n\nVocê pode:\n\n1️⃣ Buscar mentores disponíveis\n2️⃣ Agendar uma sessão de mentoria\n3️⃣ Explorar diferentes áreas de conhecimento\n4️⃣ Receber recomendações personalizadas" },
+        { "from": "concierge", "text": "Estou aqui para ajudar você em cada etapa da sua jornada de desenvolvimento profissional. 😊\n\nPode me fazer qualquer pergunta!" }
+      ]
+    },
+    {
+      "name": "1 - Descoberta",
+      "description": "Primeiro contato e entendimento dos objetivos do usuário",
+      "messages": [
+        { "from": "user", "text": "Oi, tudo bem? Vi o MentorMatch no Instagram e queria entender melhor como funciona a mentoria." },
+        { "from": "concierge", "text": "Olá! Seja muito bem-vindo ao MentorMatch. 😊\n\nÉ um prazer enorme falar com você.\n\nAqui nós trabalhamos com mentorias profissionais personalizadas, acompanhadas por uma inteligência artificial que te ajuda a organizar sua evolução, gerar resumos, tarefas e metas realmente alinhadas ao que você busca.\n\nPara deixar sua experiência mais personalizada, posso saber seu nome?" },
+        { "from": "user", "text": "Claro, meu nome é Pedro." },
+        { "from": "concierge", "text": "Ótimo, Pedro. Obrigado pela confiança.\n\nFico feliz que tenha nos procurado — muitas pessoas chegam até nós justamente buscando clareza profissional.\n\nPara começarmos, me diga: o que você busca hoje?\n\nVocê prefere conhecer:\n\n1️⃣ Nossos planos de mentoria,\n\n2️⃣ Nossos mentores disponíveis,\n\n3️⃣ Ou prefere que eu te ajude a entender seus objetivos na carreira?" },
+        { "from": "user", "text": "Acho que preciso de ajuda para entender meus objetivos." },
+        { "from": "concierge", "text": "Perfeito, Pedro.\n\nIsso é mais comum do que imagina — e é exatamente por isso que existe o MentorMatch.\n\nQuando converso com pessoas que buscam clareza profissional, normalmente os objetivos caem em uma destas categorias:\n\n• Crescimento profissional dentro da empresa\n• Mudança de área ou reposicionamento\n• Identificação de pontos fortes e desenvolvimento de habilidades\n• Maior visibilidade profissional\n• Preparação para liderança\n• Planejamento de carreira em médio e longo prazo\n\nAlgum desses te representa hoje?" },
+        { "from": "user", "text": "Sim, crescimento profissional. Quero evoluir na minha área." },
+        { "from": "concierge", "text": "Excelente, Pedro. Já estamos no caminho certo.\n\nCom base nisso, posso montar uma recomendação personalizada envolvendo o melhor plano e um mentor ideal para te ajudar.\n\nQuer que eu faça isso?" },
+        { "from": "user", "text": "Sim, por favor." }
+      ]
+    },
+    {
+      "name": "2 - Recomendação de Plano",
+      "description": "Apresentação do plano e mentor recomendados",
+      "messages": [
+        { "from": "concierge", "text": "Pedro, analisei seu objetivo de crescimento.\n\nCom isso, recomendo a seguinte combinação:\n\n🔹 Plano recomendado:\n\nPlano Individual – Mensal\n\n✔ Sessões 1 a 1\n✔ Acompanhamento IA entre sessões\n✔ Resumo, tarefas e metas automáticas\n✔ Flexibilidade para reagendamentos\n\n🔹 Mentor sugerido:\n\nUm profissional sênior com experiência em crescimento de carreira, tomada de decisão, novos desafios e construção de plano profissional.\n\nEsse formato costuma trazer resultados sólidos porque concentra a mentoria nas suas necessidades específicas.\n\nVocê gostaria de seguir com esse plano?" },
+        { "from": "user", "text": "Sim, quero esse mesmo." },
+        { "from": "concierge", "text": "Excelente escolha.\n\nVou te acompanhar em todo o processo até a sua primeira sessão." }
+      ]
+    },
+    {
+      "name": "3 - Agendamento",
+      "description": "Processo de agendamento de sessão com mentor",
+      "messages": [
+        { "from": "concierge", "text": "Como posso ajudar você hoje? Se precisar de informações sobre suas sessões, mentores ou agendar uma nova sessão, estou à disposição!" },
+        { "from": "user", "text": "quero agendar uma sessao" },
+        { "from": "concierge", "text": "Perfeito 😊\nAqui estão os horários disponíveis para agendar uma sessão com Naiara Bertholim:\n\n📅 Quinta–feira – 22 de janeiro de 2026\n• 17:00h às 18:00h\n• 18:00h às 19:00h\n• 19:00h às 20:00h\n• 20:00h às 21:00h\n• 21:00h às 22:00h\n• 22:00h às 23:00h\n\n📅 Segunda–feira – 26 de janeiro de 2026\n• 14:00h às 15:00h\n• 15:00h às 16:00h\n• 16:00h às 17:00h\n• 17:00h às 18:00h\n\n📅 Terça–feira – 27 de janeiro de 2026\n• 09:00h às 10:00h\n• 10:00h às 11:00h\n• 11:00h às 12:00h\n• 12:00h às 13:00h\n• 13:00h às 14:00h\n• 14:00h às 15:00h\n• 15:00h às 16:00h\n• 16:00h às 17:00h\n• 17:00h às 18:00h\n\n📅 Quarta–feira – 28 de janeiro de 2026\n• 09:00h às 10:00h\n• 10:00h às 11:00h\n• 11:00h às 12:00h\n• 12:00h às 13:00h\n• 13:00h às 14:00h\n• 14:00h às 15:00h\n• 15:00h às 16:00h\n• 16:00h às 17:00h\n• 17:00h às 18:00h\n\nQuando preferir, é só me dizer o dia e horário 😊" },
+        { "from": "user", "text": "Quarta–feira – 28 de janeiro de 2026\n09:00h às 10:00h" },
+        { "from": "concierge", "text": "✅ Agendamento confirmado!\n\nSua sessão foi criada com sucesso:\n\n🧠 Mentor: Naiara Bertholim\n📅 Data: Quarta-feira, 28 de janeiro de 2026\n⏰ Horário: 09:00h\n⏳ Duração: 60 minutos\n🆔 ID da Sessão: e8495fe8-b074-4456-98d2-2de741f4b51f\n🔗 Link do Zoom: https://us06web.zoom.us/j/84748667564?pwd=Dv6WS5mBxR7BOv00ZVklsabiQbCW6n.1\n\nVocê pode usar este link para acessar a reunião no horário agendado. Se precisar de mais alguma coisa, é só avisar! 😊" }
+      ]
+    },
+    {
+      "name": "4 - Pós-Sessão",
+      "description": "Feedback após a primeira sessão de mentoria",
+      "messages": [
+        { "from": "user", "text": "Acabei de terminar a sessão. Gostei muito, obrigado!" },
+        { "from": "concierge", "text": "Que ótimo saber disso, Pedro!\n\nFico realmente feliz que sua primeira experiência tenha sido positiva — essa jornada é sobre o seu crescimento, e nosso time está aqui para te dar todo o suporte.\n\nAgora nossa IA irá processar a transcrição da sessão e gerar:\n\n• Um resumo objetivo\n• Tarefas alinhadas ao seu objetivo\n• Próximas metas sugeridas\n\nAssim que estiver pronto, eu te envio.\n\nLeva apenas alguns instantes. 😉" }
+      ]
+    },
+    {
+      "name": "5 - Resumo IA",
+      "description": "Entrega do resumo, tarefas e metas geradas pela IA",
+      "messages": [
+        { "from": "concierge", "text": "Pedro, tudo pronto!\n\nAqui está o material gerado pela IA e revisado pelo seu mentor:\n\n📘 RESUMO DA SESSÃO\n\nDurante a conversa, você analisou seu momento atual na carreira e identificou:\n\n• Desejo de crescer dentro da área\n• Falta de clareza sobre quais passos tomar primeiro\n• Dificuldade em comunicar seus resultados internamente\n• Vontade de aumentar sua visibilidade profissional\n• Interesse em desenvolver um plano estruturado de evolução\n\nTambém foram discutidas ações práticas para ganhar tração de imediato." },
+        { "from": "concierge", "text": "📝 TAREFAS PARA ESTA SEMANA\n\n1️⃣ Criar uma lista com 3 projetos em que você gerou resultado mensurável.\n\n2️⃣ Atualizar seu currículo destacando impacto, não atividades.\n\n3️⃣ Fazer uma autoavaliação sobre seus principais pontos fortes (IA pode te ajudar nisso).\n\n4️⃣ Enviar mensagem para duas pessoas-chave da sua área retomando contato profissional.\n\n5️⃣ Registrar em um documento o que você entende como \"crescimento\" — cargos, faixa salarial, responsabilidades, etc." },
+        { "from": "concierge", "text": "🎯 META PARA A PRÓXIMA SESSÃO\n\nConstruir um roteiro de posicionamento profissional baseado nos seus resultados, habilidades e metas de curto prazo.\n\nSe quiser, posso te enviar lembretes durante a semana. Deseja ativar?" }
+      ]
+    },
+    {
+      "name": "6 - Continuidade",
+      "description": "Agradecimento e agendamento da próxima sessão",
+      "messages": [
+        { "from": "user", "text": "John, muito obrigado por tudo. A sessão foi excelente e o material também." },
+        { "from": "concierge", "text": "Eu que agradeço, Pedro.\n\nFico muito feliz em ver sua dedicação — isso faz toda diferença no processo de crescimento profissional.\n\nVocê já quer deixar a próxima sessão agendada, ou prefere avançar primeiro nas tarefas e depois marcamos?" },
+        { "from": "user", "text": "Podemos já agendar." },
+        { "from": "concierge", "text": "Perfeito!\n\nMe envie novamente 2 ou 3 opções de horário, e confirmo tudo para você.\n\nSerá um prazer continuar acompanhando sua evolução 🙌" }
+      ]
+    }
+  ]
+}
+

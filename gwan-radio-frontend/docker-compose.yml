@@ -1,0 +1,58 @@
+# Docker Compose para o Frontend Gwan Radio
+# Este arquivo roda apenas o frontend da aplicação
+
+services:
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      no_cache: true
+      pull: true
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:3001/api}
+        - VITE_APP_NAME=Gwan Radio
+        - VITE_APP_VERSION=1.0.0
+    container_name: gwan-radio-frontend
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:3001/api}
+      - NGINX_LOG_LEVEL=debug
+    networks:
+      - gwan
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=gwan"
+      
+      # Router HTTP (redireciona para HTTPS)
+      - "traefik.http.routers.frontend-http.rule=Host(`radio.gwan.com.br`)"
+      - "traefik.http.routers.frontend-http.entrypoints=web"
+      - "traefik.http.routers.frontend-http.middlewares=frontend-redirect"
+      
+      # Router HTTPS
+      - "traefik.http.routers.frontend.rule=Host(`radio.gwan.com.br`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.frontend.middlewares=frontend-headers"
+      
+      # Middleware: Redirect HTTP to HTTPS
+      - "traefik.http.middlewares.frontend-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.frontend-redirect.redirectscheme.permanent=true"
+      
+      # Middleware: Headers para proxy reverso
+      - "traefik.http.middlewares.frontend-headers.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.middlewares.frontend-headers.headers.customrequestheaders.X-Forwarded-Host=radio.gwan.com.br"
+      
+      # Service: Frontend (HTTP dentro do container na porta 80)
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  gwan:
+    external: true

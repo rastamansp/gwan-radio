@@ -15,7 +15,7 @@ custom/
 
 ### 1. Habilitar Customizações no AzuraCast
 
-1. Acesse o painel administrativo: `https://radio.gwan.com.br`
+1. Acesse o painel administrativo: `https://cast.gwan.com.br`
 2. Vá em **Administration** → **Settings** → **Custom Branding**
 3. Ative as opções:
    - ✅ **Enable Custom CSS**

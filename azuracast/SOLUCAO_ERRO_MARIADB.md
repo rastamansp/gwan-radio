@@ -216,7 +216,7 @@ Via Portainer Console:
 
 ### Teste 3: Acessar o site
 
-1. Acesse `https://radio.gwan.com.br`
+1. Acesse `https://cast.gwan.com.br`
 2. Deve aparecer a tela de criação do usuário administrador
 
 ## ⚠️ Avisos Importantes

@@ -16,37 +16,68 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=gwan"
 
+      # ============================================
+      # Rota: cast.gwan.com.br (Admin + API)
+      # ============================================
       # Router HTTP (redireciona para HTTPS)
-      - "traefik.http.routers.azuracast-http.rule=Host(`radio.gwan.com.br`)"
+      - "traefik.http.routers.azuracast-http.rule=Host(`cast.gwan.com.br`)"
       - "traefik.http.routers.azuracast-http.entrypoints=web"
       - "traefik.http.routers.azuracast-http.middlewares=azuracast-redirect"
 
       # Router HTTPS
-      - "traefik.http.routers.azuracast.rule=Host(`radio.gwan.com.br`)"
+      - "traefik.http.routers.azuracast.rule=Host(`cast.gwan.com.br`)"
       - "traefik.http.routers.azuracast.entrypoints=websecure"
       - "traefik.http.routers.azuracast.tls=true"
       - "traefik.http.routers.azuracast.tls.certresolver=letsencrypt"
       - "traefik.http.routers.azuracast.middlewares=azuracast-headers"
 
-      # Middleware: Redirect HTTP to HTTPS
+      # ============================================
+      # Rota: stream.gwan.com.br (Stream de Áudio)
+      # ============================================
+      # Router HTTP para stream (redireciona para HTTPS)
+      - "traefik.http.routers.stream-http.rule=Host(`stream.gwan.com.br`)"
+      - "traefik.http.routers.stream-http.entrypoints=web"
+      - "traefik.http.routers.stream-http.middlewares=stream-redirect"
+
+      # Router HTTPS para stream
+      - "traefik.http.routers.stream.rule=Host(`stream.gwan.com.br`)"
+      - "traefik.http.routers.stream.entrypoints=websecure"
+      - "traefik.http.routers.stream.tls=true"
+      - "traefik.http.routers.stream.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.stream.middlewares=stream-headers"
+
+      # Middleware: Redirect HTTP to HTTPS (AzuraCast)
       - "traefik.http.middlewares.azuracast-redirect.redirectscheme.scheme=https"
       - "traefik.http.middlewares.azuracast-redirect.redirectscheme.permanent=true"
 
-      # Middleware: Headers para proxy reverso
+      # Middleware: Redirect HTTP to HTTPS (Stream)
+      - "traefik.http.middlewares.stream-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.stream-redirect.redirectscheme.permanent=true"
+
+      # Middleware: Headers para proxy reverso (AzuraCast)
       - "traefik.http.middlewares.azuracast-headers.headers.customrequestheaders.X-Forwarded-Proto=https"
-      - "traefik.http.middlewares.azuracast-headers.headers.customrequestheaders.X-Forwarded-Host=radio.gwan.com.br"
+      - "traefik.http.middlewares.azuracast-headers.headers.customrequestheaders.X-Forwarded-Host=cast.gwan.com.br"
       - "traefik.http.middlewares.azuracast-headers.headers.customrequestheaders.X-Real-IP="
+
+      # Middleware: Headers para proxy reverso (Stream)
+      - "traefik.http.middlewares.stream-headers.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.middlewares.stream-headers.headers.customrequestheaders.X-Forwarded-Host=stream.gwan.com.br"
+      - "traefik.http.middlewares.stream-headers.headers.customrequestheaders.X-Real-IP="
 
       # Service: AzuraCast (HTTP dentro do container na porta 80)
       - "traefik.http.services.azuracast.loadbalancer.server.port=80"
+
+      # Service: Stream (HTTP dentro do container na porta 8000)
+      - "traefik.http.services.stream.loadbalancer.server.port=8000"
     
     # IMPORTANTE: Em produção com Traefik, não precisamos expor portas HTTP/HTTPS
-    # O Traefik acessa o container diretamente via network Docker na porta 80 interna
-    # Apenas expomos SFTP e streams que precisam ser acessados diretamente
+    # O Traefik acessa o container diretamente via network Docker nas portas 80 (admin) e 8000 (stream)
+    # Apenas expomos SFTP e portas de stream adicionais que podem ser necessárias
     ports:
       - "2022:2022"      # SFTP
       # Streams: mapeia portas externas 10000-10099 para portas internas 8000-8099
-      # Isso evita conflito com portas 8000, 9000 e 10080 que podem estar em uso
+      # Isso permite acesso direto por IP se necessário, mas o acesso principal é via stream.gwan.com.br
+      # A porta 8000 é acessada via Traefik (stream.gwan.com.br), não precisa ser exposta externamente
       - "10000-10099:8000-8099"
     
     # Volumes: definidos explicitamente para garantir funcionamento no Portainer
