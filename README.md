@@ -81,7 +81,7 @@ Este repositório contém dois projetos principais que trabalham juntos para for
 
 - **Frontend (Portal Público)**: `https://radio.gwan.com.br` - Portal React servido por Nginx/Node
 - **AzuraCast (Painel Admin + API)**: `https://cast.gwan.com.br` - Painel administrativo e API REST
-- **Stream de Áudio**: `https://stream.gwan.com.br/listen/gwan_radio/stream` - Stream via Traefik roteando para porta 8000 (sem porta no URL)
+- **Stream de Áudio**: `https://stream.gwan.com.br/listen/gwan_radio/stream` - Stream via Traefik roteando para porta 8000 (sem porta no URL, com SSL)
 - **API Now Playing**: `https://cast.gwan.com.br/api/nowplaying/gwan_radio`
 
 ## 📁 Estrutura do Repositório

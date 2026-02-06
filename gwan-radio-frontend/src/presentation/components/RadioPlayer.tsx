@@ -11,6 +11,8 @@ export const RadioPlayer = () => {
     volume,
     isExpanded,
     nowPlaying,
+    stationInfo,
+    isLoadingStation,
     error,
     toggle,
     setVolume,

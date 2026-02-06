@@ -1,7 +1,8 @@
 import { Helmet } from 'react-helmet-async';
-import { Instagram, Youtube, MessageCircle, Radio, Music, Headphones } from 'lucide-react';
+import { Instagram, Youtube, MessageCircle, Radio, Music, Headphones, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { useRadio } from '../contexts/RadioContext';
 
 const socialLinks = [
   {
@@ -43,13 +44,33 @@ const features = [
 ];
 
 const Sobre = () => {
+  const { stationInfo, nowPlaying, isLoadingStation } = useRadio();
+  
+  const stationName = stationInfo?.name || 'GWAN Reggae Radio';
+  const stationDescription = stationInfo?.description || 'Sua rádio de reggae 24 horas. Nossa missão é difundir a cultura reggae no Brasil.';
+  const genres = stationInfo?.genres?.join(' • ') || 'Reggae 24/7 • Dancehall • Roots • Dub';
+  const logoUrl = stationInfo?.logo_url || stationInfo?.logo;
+  const socialLinksFromApi = stationInfo?.social_links || [];
+  
+  // Combine API social links with default ones
+  const allSocialLinks = [
+    ...socialLinksFromApi.map(link => ({
+      name: link.name || link.type,
+      url: link.url,
+      icon: link.type === 'instagram' ? Instagram : link.type === 'youtube' ? Youtube : MessageCircle,
+      color: link.type === 'instagram' ? 'hover:text-pink-500' : link.type === 'youtube' ? 'hover:text-red-500' : 'hover:text-green-500',
+    })),
+    // Keep default links if API doesn't provide them
+    ...(socialLinksFromApi.length === 0 ? socialLinks : []),
+  ];
+  
   return (
     <>
       <Helmet>
-        <title>Sobre | GWAN Reggae Radio</title>
+        <title>Sobre | {stationName}</title>
         <meta
           name="description"
-          content="Conheça a GWAN Reggae Radio, sua rádio de reggae 24 horas. Nossa missão é difundir a cultura reggae no Brasil."
+          content={stationDescription}
         />
       </Helmet>
 
@@ -57,12 +78,30 @@ const Sobre = () => {
         <div className="container max-w-4xl">
           {/* Header */}
           <div className="text-center mb-12">
+            {logoUrl && (
+              <div className="mb-6 flex justify-center">
+                <img
+                  src={logoUrl}
+                  alt={stationName}
+                  className="h-32 w-32 object-contain"
+                />
+              </div>
+            )}
             <h1 className="text-5xl font-bold mb-4">
-              <span className="text-gradient-reggae">GWAN</span> Reggae Radio
+              <span className="text-gradient-reggae">{stationName.split(' ')[0]}</span>
+              {stationName.split(' ').slice(1).length > 0 && (
+                <span className="text-foreground"> {stationName.split(' ').slice(1).join(' ')}</span>
+              )}
             </h1>
             <p className="text-xl text-muted-foreground">
-              Reggae 24/7 • Dancehall • Roots • Dub
+              {genres}
             </p>
+            {nowPlaying.listeners && nowPlaying.listeners > 0 && (
+              <div className="mt-4 flex items-center justify-center gap-2 text-muted-foreground">
+                <Users className="h-5 w-5" />
+                <span>{nowPlaying.listeners} ouvinte{nowPlaying.listeners !== 1 ? 's' : ''} agora</span>
+              </div>
+            )}
           </div>
 
           {/* About Text */}
@@ -71,25 +110,41 @@ const Sobre = () => {
               <CardContent className="p-8">
                 <h2 className="text-2xl font-bold mb-4">Nossa História</h2>
                 <div className="space-y-4 text-foreground/90">
-                  <p>
-                    A <strong className="text-primary">GWAN Reggae Radio</strong> nasceu da paixão pela música reggae e 
-                    pela cultura jamaicana. Somos uma rádio online brasileira dedicada a difundir o melhor do reggae, 
-                    dancehall, dub e sound system 24 horas por dia, 7 dias por semana.
-                  </p>
-                  <p>
-                    Nossa missão é conectar fãs de reggae de todo o Brasil, promovendo artistas nacionais e 
-                    internacionais, divulgando eventos e festas, e mantendo viva a cultura sound system em terras 
-                    brasileiras.
-                  </p>
-                  <p>
-                    O nome <strong className="text-primary">"GWAN"</strong> vem do patois jamaicano e significa 
-                    "ir em frente", "continuar" - um chamado para seguir sempre em frente com positividade e fé. 
-                    É essa energia que queremos transmitir através da nossa programação.
-                  </p>
-                  <p>
-                    Desde São Paulo para o mundo, a GWAN Reggae Radio é sua conexão direta com as vibes positivas 
-                    do reggae. <em className="text-secondary">One Love!</em>
-                  </p>
+                  {isLoadingStation ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                  ) : stationDescription ? (
+                    <div className="whitespace-pre-line">
+                      {stationDescription.split('\n').map((paragraph, index) => (
+                        <p key={index} className={index > 0 ? 'mt-4' : ''}>
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  ) : (
+                    <>
+                      <p>
+                        A <strong className="text-primary">{stationName}</strong> nasceu da paixão pela música reggae e 
+                        pela cultura jamaicana. Somos uma rádio online brasileira dedicada a difundir o melhor do reggae, 
+                        dancehall, dub e sound system 24 horas por dia, 7 dias por semana.
+                      </p>
+                      <p>
+                        Nossa missão é conectar fãs de reggae de todo o Brasil, promovendo artistas nacionais e 
+                        internacionais, divulgando eventos e festas, e mantendo viva a cultura sound system em terras 
+                        brasileiras.
+                      </p>
+                      <p>
+                        O nome <strong className="text-primary">"GWAN"</strong> vem do patois jamaicano e significa 
+                        "ir em frente", "continuar" - um chamado para seguir sempre em frente com positividade e fé. 
+                        É essa energia que queremos transmitir através da nossa programação.
+                      </p>
+                      <p>
+                        Desde São Paulo para o mundo, a {stationName} é sua conexão direta com as vibes positivas 
+                        do reggae. <em className="text-secondary">One Love!</em>
+                      </p>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -119,8 +174,8 @@ const Sobre = () => {
             <p className="text-muted-foreground mb-6">
               Siga nossas redes sociais e fique por dentro de tudo que rola no mundo do reggae!
             </p>
-            <div className="flex justify-center gap-4">
-              {socialLinks.map((social) => (
+            <div className="flex justify-center gap-4 flex-wrap">
+              {allSocialLinks.map((social) => (
                 <a
                   key={social.name}
                   href={social.url}
@@ -141,7 +196,7 @@ const Sobre = () => {
 
             <div className="mt-8 p-6 rounded-lg bg-gradient-reggae">
               <p className="text-white font-bold text-lg">
-                🎵 Ouça agora a GWAN Reggae Radio e sinta as vibes positivas! 🎵
+                🎵 Ouça agora a {stationName} e sinta as vibes positivas! 🎵
               </p>
             </div>
           </section>

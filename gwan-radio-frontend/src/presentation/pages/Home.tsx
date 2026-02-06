@@ -10,7 +10,12 @@ import eventsData from '@/shared/data/events.json';
 import artistsData from '@/shared/data/artists.json';
 
 const HeroSection = () => {
-  const { play, isPlaying } = useRadio();
+  const { play, isPlaying, stationInfo, isLoadingStation } = useRadio();
+  
+  // Use station name if available, otherwise fallback to default
+  const stationName = stationInfo?.name || 'GWAN Reggae Radio';
+  const stationDescription = stationInfo?.description || 'Reggae 24/7 • Dancehall • Roots • Dub';
+  const genres = stationInfo?.genres?.join(' • ') || 'Reggae 24/7 • Dancehall • Roots • Dub';
   
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
@@ -36,21 +41,24 @@ const HeroSection = () => {
       {/* Content */}
       <div className="relative z-10 container text-center">
         <h1 className="text-5xl md:text-7xl font-bold mb-4 animate-fade-in">
-          <span className="text-gradient-reggae">GWAN</span>
-          <span className="text-foreground"> Reggae Radio</span>
+          <span className="text-gradient-reggae">{stationName.split(' ')[0]}</span>
+          {stationName.split(' ').slice(1).length > 0 && (
+            <span className="text-foreground"> {stationName.split(' ').slice(1).join(' ')}</span>
+          )}
         </h1>
         <p className="text-xl md:text-2xl text-muted-foreground mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          Reggae 24/7 • Dancehall • Roots • Dub
+          {stationDescription || genres}
         </p>
         <Button
           size="lg"
           onClick={play}
-          disabled={isPlaying}
+          disabled={isPlaying || isLoadingStation}
           className="gap-2 text-lg px-8 py-6 glow-primary animate-fade-in"
           style={{ animationDelay: '0.4s' }}
+          title={isLoadingStation ? 'Carregando informações da estação...' : undefined}
         >
           <Play className="h-5 w-5" />
-          {isPlaying ? 'Tocando Agora' : 'Ouvir Agora'}
+          {isLoadingStation ? 'Carregando...' : isPlaying ? 'Tocando Agora' : 'Ouvir Agora'}
         </Button>
       </div>
 
@@ -221,16 +229,21 @@ const ArtistOfWeek = () => {
 };
 
 const Home = () => {
+  const { stationInfo } = useRadio();
+  const stationName = stationInfo?.name || 'GWAN Reggae Radio';
+  const stationDescription = stationInfo?.description || 'Sua rádio de reggae 24 horas. Ouça o melhor do reggae, dancehall, roots e dub direto do Brasil.';
+  const genres = stationInfo?.genres?.join(' • ') || 'Reggae • Dancehall • Roots • Dub';
+  
   return (
     <>
       <Helmet>
-        <title>GWAN Reggae Radio | Reggae 24/7 • Dancehall • Roots • Dub</title>
+        <title>{stationName} | {genres}</title>
         <meta
           name="description"
-          content="GWAN Reggae Radio - Sua rádio de reggae 24 horas. Ouça o melhor do reggae, dancehall, roots e dub direto do Brasil."
+          content={stationDescription}
         />
-        <meta property="og:title" content="GWAN Reggae Radio" />
-        <meta property="og:description" content="Sua rádio de reggae 24 horas. Reggae • Dancehall • Roots • Dub" />
+        <meta property="og:title" content={stationName} />
+        <meta property="og:description" content={stationDescription} />
       </Helmet>
 
       <main>
