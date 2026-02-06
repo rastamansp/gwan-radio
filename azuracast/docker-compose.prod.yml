@@ -23,6 +23,7 @@ services:
       - "traefik.http.routers.azuracast-http.rule=Host(`cast.gwan.com.br`)"
       - "traefik.http.routers.azuracast-http.entrypoints=web"
       - "traefik.http.routers.azuracast-http.middlewares=azuracast-redirect"
+      - "traefik.http.routers.azuracast-http.service=azuracast"
 
       # Router HTTPS
       - "traefik.http.routers.azuracast.rule=Host(`cast.gwan.com.br`)"
@@ -30,6 +31,7 @@ services:
       - "traefik.http.routers.azuracast.tls=true"
       - "traefik.http.routers.azuracast.tls.certresolver=letsencrypt"
       - "traefik.http.routers.azuracast.middlewares=azuracast-headers"
+      - "traefik.http.routers.azuracast.service=azuracast"
 
       # ============================================
       # Rota: stream.gwan.com.br (Stream de Áudio)
@@ -38,6 +40,7 @@ services:
       - "traefik.http.routers.stream-http.rule=Host(`stream.gwan.com.br`)"
       - "traefik.http.routers.stream-http.entrypoints=web"
       - "traefik.http.routers.stream-http.middlewares=stream-redirect"
+      - "traefik.http.routers.stream-http.service=stream"
 
       # Router HTTPS para stream
       - "traefik.http.routers.stream.rule=Host(`stream.gwan.com.br`)"
@@ -45,6 +48,7 @@ services:
       - "traefik.http.routers.stream.tls=true"
       - "traefik.http.routers.stream.tls.certresolver=letsencrypt"
       - "traefik.http.routers.stream.middlewares=stream-headers"
+      - "traefik.http.routers.stream.service=stream"
 
       # Middleware: Redirect HTTP to HTTPS (AzuraCast)
       - "traefik.http.middlewares.azuracast-redirect.redirectscheme.scheme=https"
